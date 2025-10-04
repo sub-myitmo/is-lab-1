@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.25.xsd">
+
+    <changeSet id="1" author="you">
+        <createTable tableName="coordinates">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="x" type="FLOAT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="y" type="INTEGER"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="2" author="you">
+        <createTable tableName="locations">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="x" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="y" type="BIGINT">
+            </column>
+            <column name="z" type="BIGINT">
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="3" author="you">
+        <createTable tableName="persons">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="coordinates_id" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_person_coordinates" references="coordinates(id)"/>
+            </column>
+            <column name="creation_date" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="eye_color" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="hair_color" type="VARCHAR(50)"/>
+            <column name="location_id" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_person_location" references="locations(id)"/>
+            </column>
+            <column name="height" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="weight" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="passport_id" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="nationality" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>

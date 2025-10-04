@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.25.xsd">
+
+    <!-- Загружаем координаты -->
+    <changeSet id="4" author="you">
+        <loadData
+                file="data/coordinates.csv"
+                tableName="coordinates"
+                separator=","
+                quotchar="&quot;">
+            <column name="id" type="NUMERIC"/>
+            <column name="x" type="NUMERIC"/>
+            <column name="y" type="NUMERIC"/>
+        </loadData>
+    </changeSet>
+
+    <!-- Загружаем локации -->
+    <changeSet id="5" author="you">
+        <loadData
+                file="data/location.csv"
+                tableName="locations"
+                separator=","
+                quotchar="&quot;">
+            <column name="id" type="NUMERIC"/>
+            <column name="x" type="NUMERIC"/>
+            <column name="y" type="NUMERIC"/>
+            <column name="z" type="NUMERIC"/>
+        </loadData>
+    </changeSet>
+
+    <!-- Загружаем персон -->
+    <changeSet id="6" author="you">
+        <loadData
+                file="data/persons.csv"
+                tableName="persons"
+                separator=","
+                quotchar="&quot;">
+            <column name="id" type="NUMERIC"/>
+            <column name="name" type="STRING"/>
+            <column name="coordinates_id" type="NUMERIC"/>
+            <column name="creation_date" type="TIMESTAMP"/>
+            <column name="eye_color" type="STRING"/>
+            <column name="hair_color" type="STRING"/>
+            <column name="location_id" type="NUMERIC"/>
+            <column name="height" type="NUMERIC"/>
+            <column name="weight" type="NUMERIC"/>
+            <column name="passport_id" type="STRING"/>
+            <column name="nationality" type="STRING"/>
+        </loadData>
+    </changeSet>
+
+</databaseChangeLog>

@@ -1,0 +1,16 @@
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+export.sh
+wildfly-30.0.1.Final/
+
+frontend/node_modules/
+fromtend/dist/
+
+.idea/
+
+frontend/src/components/Auth/
+frontend/src/App-with-auth.jsx
+

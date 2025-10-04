@@ -1,0 +1,138 @@
+.special-operations-panel {
+    background: white;
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.special-operations-panel h2 {
+    margin-bottom: 2rem;
+    color: #495057;
+    text-align: center;
+    font-size: 2rem;
+}
+
+.operations-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+}
+
+.operation-card {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border-left: 4px solid #667eea;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.operation-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.operation-card h3 {
+    margin-bottom: 0.5rem;
+    color: #495057;
+    font-size: 1.1rem;
+}
+
+.operation-card p {
+    color: #6c757d;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.operation-card select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #e9ecef;
+    border-radius: 4px;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    background: white;
+}
+
+.operation-card button {
+    width: 100%;
+    padding: 0.75rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.3s;
+}
+
+.operation-card button:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.operation-card button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.operation-loading {
+    text-align: center;
+    padding: 2rem;
+    color: #667eea;
+    font-size: 1.1rem;
+}
+
+.operation-result {
+    background: #e8f5e8;
+    border: 1px solid #4caf50;
+    border-radius: 6px;
+    padding: 1.5rem;
+    margin-top: 2rem;
+}
+
+.operation-result h3 {
+    margin-bottom: 1rem;
+    color: #2e7d32;
+    font-size: 1.2rem;
+}
+
+.operation-result pre {
+    background: white;
+    padding: 1rem;
+    border-radius: 4px;
+    overflow-x: auto;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    border: 1px solid #ddd;
+}
+
+.operation-error {
+    background: #f8d7da;
+    border: 1px solid #dc3545;
+    border-radius: 6px;
+    padding: 1.5rem;
+    margin-top: 2rem;
+}
+
+.operation-error h3 {
+    margin-bottom: 1rem;
+    color: #dc3545;
+}
+
+@media (max-width: 768px) {
+    .special-operations-panel {
+        padding: 1rem;
+    }
+
+    .operations-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .operation-card {
+        padding: 1rem;
+    }
+}
