@@ -2,6 +2,7 @@ package ru.is1.dal.entity;
 
 import lombok.Getter;
 import lombok.Setter;
+import ru.is1.dal.Identifiable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +11,7 @@ import java.util.Objects;
 
 @Setter
 @Getter
-public class Location {
+public class Location implements Identifiable {
     private Long id;
 
     private Integer x;

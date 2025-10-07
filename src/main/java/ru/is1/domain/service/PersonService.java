@@ -89,10 +89,6 @@ public class PersonService {
         return false;
     }
 
-    public List<Person> getAllPersons() {
-        return personDAO.findAll();
-    }
-
     public List<Person> getPersonsPaginated(int first, int size, String field, String direction) {
         return personDAO.findWithPagination(first, size, field, direction);
     }

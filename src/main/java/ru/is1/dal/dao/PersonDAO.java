@@ -15,47 +15,21 @@ import java.util.*;
 
 @ApplicationScoped
 @MonitorPerformance
-public class PersonDAO {
-
-    public Person save(Person person) {
-        Transaction tx = null;
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            tx = session.beginTransaction();
-            if (person.getId() == null) {
-                session.persist(person);
-            } else {
-                person = session.merge(person);
-            }
-            tx.commit();
-            return person;
-        } catch (Exception e) {
-            if (tx != null) tx.rollback();
-            throw e;
-        }
+public class PersonDAO extends AbstractDAO<Person> {
+    public PersonDAO() {
+        super(Person.class);
     }
 
-    public Optional<Person> findById(Long id) {
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            Person person = session.get(Person.class, id);
-            if (person != null) {
-                Hibernate.initialize(person.getLocation());
-                Hibernate.initialize(person.getCoordinates());
-            }
-            return Optional.ofNullable(person);
-        }
+
+    @Override
+    protected boolean canDelete(Session session, Long id, Person entity) {
+        return true;
     }
 
-    public Person update(Person person) {
-        Transaction tx = null;
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            tx = session.beginTransaction();
-            person = session.merge(person);
-            tx.commit();
-            return person;
-        } catch (Exception e) {
-            if (tx != null) tx.rollback();
-            throw e;
-        }
+    @Override
+    protected void initializeLazyFields(Session session, Person person) {
+        Hibernate.initialize(person.getLocation());
+        Hibernate.initialize(person.getCoordinates());
     }
 
     public boolean deletePersonAndAllTransitivelyRelated(Long initialPersonId) {
@@ -63,14 +37,12 @@ public class PersonDAO {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             tx = session.beginTransaction();
 
-            // 1. Проверяем, существует ли начальный Person
             Person initial = session.get(Person.class, initialPersonId);
             if (initial == null) {
-                tx.rollback(); // или commit — но rollback логичнее при "ничего не сделано"
+                tx.rollback();
                 return false;
             }
 
-            // 2. Инициализируем множества для сбора всех связанных сущностей
             Set<Long> personIds = new HashSet<>();
             Set<Long> coordIds = new HashSet<>();
             Set<Long> locationIds = new HashSet<>();
@@ -83,10 +55,8 @@ public class PersonDAO {
             do {
                 changed = false;
 
-                // Получаем ID новых Person по текущим связям
                 List<Long> newPersonIds = findPersonIdsByCoordOrLocation(session, coordIds, locationIds);
 
-                // Добавляем новых Person
                 for (Long pid : newPersonIds) {
                     if (personIds.add(pid)) {
                         changed = true;
@@ -95,7 +65,7 @@ public class PersonDAO {
 
                 // Если есть новые Person — собираем их Coordinates и Location
                 if (changed && !newPersonIds.isEmpty()) {
-                    List<Person> newPersons = session.createQuery(
+                    List<Person> newPersons = session.createSelectionQuery(
                                     "SELECT p FROM Person p WHERE p.id IN :ids", Person.class)
                             .setParameter("ids", newPersonIds)
                             .getResultList();
@@ -110,19 +80,19 @@ public class PersonDAO {
 
             // 3. Удаляем всё (в правильном порядке: сначала Person, потом зависимости)
             if (!personIds.isEmpty()) {
-                session.createQuery("DELETE FROM Person p WHERE p.id IN :ids")
+                session.createMutationQuery("DELETE FROM Person p WHERE p.id IN :ids")
                         .setParameter("ids", personIds)
                         .executeUpdate();
             }
 
             if (!coordIds.isEmpty()) {
-                session.createQuery("DELETE FROM Coordinates c WHERE c.id IN :ids")
+                session.createMutationQuery("DELETE FROM Coordinates c WHERE c.id IN :ids")
                         .setParameter("ids", coordIds)
                         .executeUpdate();
             }
 
             if (!locationIds.isEmpty()) {
-                session.createQuery("DELETE FROM Location l WHERE l.id IN :ids")
+                session.createMutationQuery("DELETE FROM Location l WHERE l.id IN :ids")
                         .setParameter("ids", locationIds)
                         .executeUpdate();
             }
@@ -166,47 +136,18 @@ public class PersonDAO {
 
         return query.getResultList();
     }
-//
-//    public boolean delete(Long id) {
-//        Transaction tx = null;
-//        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-//            tx = session.beginTransaction();
-//            Person person = session.get(Person.class, id);
-//            if (person != null) {
-//                session.remove(person);
-//                tx.commit();
-//                return true;
-//            }
-//            tx.rollback();
-//            return false;
-//        } catch (Exception e) {
-//            if (tx != null) tx.rollback();
-//            return false;
-//        }
-//    }
 
     public long getTotalCount() {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            return session.createQuery("SELECT COUNT(p) FROM Person p", Long.class)
+            return session.createSelectionQuery("SELECT COUNT(p) FROM Person p", Long.class)
                     .uniqueResult();
         }
     }
 
-    public List<Person> findAll() {
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            List<Person> persons = session.createQuery("FROM Person", Person.class).list();
-            // Инициализируем связи для всех объектов
-            for (Person p : persons) {
-                Hibernate.initialize(p.getLocation());
-                Hibernate.initialize(p.getCoordinates());
-            }
-            return persons;
-        }
-    }
 
     public List<Person> findWithPagination(int first, int pageSize, String field, String direction) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            List<Person> persons = session.createQuery("FROM Person p ORDER BY p." + field + " " + direction, Person.class)
+            List<Person> persons = session.createSelectionQuery("FROM Person p ORDER BY p." + field + " " + direction, Person.class)
                     .setFirstResult(first)
                     .setMaxResults(pageSize)
                     .list();
@@ -221,7 +162,7 @@ public class PersonDAO {
     // Специальные операции
     public List<Person> search(int first, int pageSize, String field, String namePattern, String direction) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            List<Person> persons = session.createQuery(
+            List<Person> persons = session.createSelectionQuery(
                             "FROM Person p WHERE LOWER(p." + field + ") LIKE LOWER(:pattern) ORDER BY p." + field + " " + direction, Person.class)
                     .setParameter("pattern", "%" + namePattern + "%")
                     .setFirstResult(first)
@@ -237,18 +178,18 @@ public class PersonDAO {
 
     public Optional<Long> findByPassportID(String passportID) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            Long id = session.createQuery(
+            Long id = session.createSelectionQuery(
                             "SELECT p.id FROM Person p WHERE p.passportID = :passportID", Long.class)
                     .setParameter("passportID", passportID)
                     .setMaxResults(1)
-                    .uniqueResult(); // ← обязательно вызвать!
+                    .uniqueResult();
             return Optional.ofNullable(id);
         }
     }
 
     public Optional<Person> findMinPassportID() {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            Person person = session.createQuery(
+            Person person = session.createSelectionQuery(
                             "FROM Person p ORDER BY p.passportID ASC", Person.class)
                     .setMaxResults(1)
                     .uniqueResult();
@@ -262,7 +203,7 @@ public class PersonDAO {
 
     public long countByNationalityLessThan(Country nationality) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            return session.createQuery(
+            return session.createSelectionQuery(
                             "SELECT COUNT(p) FROM Person p WHERE p.nationality < :nationality", Long.class)
                     .setParameter("nationality", nationality)
                     .uniqueResult();
@@ -271,7 +212,7 @@ public class PersonDAO {
 
     public long countByNationalityGreaterThan(Country nationality) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            return session.createQuery(
+            return session.createSelectionQuery(
                             "SELECT COUNT(p) FROM Person p WHERE p.nationality > :nationality", Long.class)
                     .setParameter("nationality", nationality)
                     .uniqueResult();
@@ -280,7 +221,7 @@ public class PersonDAO {
 
     public long countByHairColor(Color hairColor) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            return session.createQuery(
+            return session.createSelectionQuery(
                             "SELECT COUNT(p) FROM Person p WHERE p.hairColor = :hairColor", Long.class)
                     .setParameter("hairColor", hairColor)
                     .uniqueResult();
@@ -289,7 +230,7 @@ public class PersonDAO {
 
     public long countByEyeColor(Color eyeColor) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            return session.createQuery(
+            return session.createSelectionQuery(
                             "SELECT COUNT(p) FROM Person p WHERE p.eyeColor = :eyeColor", Long.class)
                     .setParameter("eyeColor", eyeColor)
                     .uniqueResult();

@@ -2,12 +2,13 @@ package ru.is1.dal.entity;
 
 import lombok.Getter;
 import lombok.Setter;
+import ru.is1.dal.Identifiable;
 
 import java.time.LocalDateTime;
 
 @Getter
 @Setter
-public class Person {
+public class Person implements Identifiable {
     private Long id;
 
     private String name;

@@ -2,13 +2,14 @@ package ru.is1.dal.entity;
 
 import lombok.Getter;
 import lombok.Setter;
+import ru.is1.dal.Identifiable;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Getter
 @Setter
-public class Coordinates {
+public class Coordinates implements Identifiable {
     private Long id;
 
     private Float x;
