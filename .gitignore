@@ -7,7 +7,7 @@ export.sh
 wildfly-30.0.1.Final/
 
 frontend/node_modules/
-fromtend/dist/
+frontend/dist/
 
 .idea/
 
