@@ -4,7 +4,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import org.hibernate.Session;
 import ru.is1.config.aop.MonitorPerformance;
 import ru.is1.config.utils.HibernateUtil;
-import ru.is1.dal.entity.Coordinates;
 import ru.is1.dal.entity.Location;
 
 import java.util.List;

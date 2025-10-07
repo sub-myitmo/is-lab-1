@@ -5,7 +5,6 @@ import org.hibernate.Transaction;
 import ru.is1.config.utils.HibernateUtil;
 import ru.is1.dal.Identifiable;
 
-import java.util.List;
 import java.util.Optional;
 
 public abstract class AbstractDAO<T extends Identifiable> {
@@ -81,9 +80,10 @@ public abstract class AbstractDAO<T extends Identifiable> {
         }
     }
 
-    protected abstract boolean canDelete(Session session, Long id, T entity);
+    protected boolean canDelete(Session session, Long id, T entity) {
+        return true;
+    };
 
-    // Абстрактный метод, который должны реализовать дочерние классы
     protected abstract void initializeLazyFields(Session session, T entity);
 
 }

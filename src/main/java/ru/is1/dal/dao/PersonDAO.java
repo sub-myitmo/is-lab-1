@@ -22,11 +22,6 @@ public class PersonDAO extends AbstractDAO<Person> {
 
 
     @Override
-    protected boolean canDelete(Session session, Long id, Person entity) {
-        return true;
-    }
-
-    @Override
     protected void initializeLazyFields(Session session, Person person) {
         Hibernate.initialize(person.getLocation());
         Hibernate.initialize(person.getCoordinates());
