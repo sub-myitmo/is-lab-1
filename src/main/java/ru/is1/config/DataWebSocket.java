@@ -16,18 +16,18 @@ public class DataWebSocket {
     @OnOpen
     public void onOpen(Session session) {
         sessions.add(session);
-        System.out.println("✅ WebSocket connected: " + session.getId());
+        System.out.println("WebSocket connected: " + session.getId());
     }
 
     @OnClose
     public void onClose(Session session) {
         sessions.remove(session);
-        System.out.println("❌ WebSocket disconnected: " + session.getId());
+        System.out.println("WebSocket disconnected: " + session.getId());
     }
 
     @OnError
     public void onError(Session session, Throwable throwable) {
-        System.err.println("💥 WebSocket error: " + throwable.getMessage());
+        System.out.println("WebSocket error: " + throwable.getMessage());
     }
 
     // Простая рассылка уведомлений о изменениях
@@ -39,9 +39,9 @@ public class DataWebSocket {
                 if (session.isOpen()) {
                     try {
                         session.getBasicRemote().sendText(message);
-                        System.out.println("📨 Sent: " + message);
+                        System.out.println("Sent: " + message);
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        throw new RuntimeException(e);
                     }
                 }
             }

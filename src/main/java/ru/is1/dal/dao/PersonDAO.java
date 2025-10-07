@@ -5,6 +5,7 @@ import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
+import ru.is1.config.aop.MonitorPerformance;
 import ru.is1.config.utils.HibernateUtil;
 import ru.is1.dal.entity.Country;
 import ru.is1.dal.entity.Color;
@@ -13,6 +14,7 @@ import ru.is1.dal.entity.Person;
 import java.util.*;
 
 @ApplicationScoped
+@MonitorPerformance
 public class PersonDAO {
 
     public Person save(Person person) {

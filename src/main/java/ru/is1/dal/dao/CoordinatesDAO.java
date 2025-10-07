@@ -3,6 +3,7 @@ package ru.is1.dal.dao;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import ru.is1.config.aop.MonitorPerformance;
 import ru.is1.config.utils.HibernateUtil;
 import ru.is1.dal.entity.Coordinates;
 
@@ -10,6 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 @ApplicationScoped
+@MonitorPerformance
 public class CoordinatesDAO {
 
     public Coordinates save(Coordinates coordinates) {
