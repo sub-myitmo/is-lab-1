@@ -1,24 +1,36 @@
 package ru.is1.config.utils;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.inject.Disposes;
+import jakarta.ws.rs.Produces;
+import jdk.jfr.Name;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.Metadata;
 import org.hibernate.boot.MetadataBuilder;
 import org.hibernate.boot.MetadataSources;
-import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 import ru.is1.dal.entity.Color;
 import ru.is1.dal.entity.Country;
 
-public class HibernateUtil {
-    private static SessionFactory sessionFactory;
+@ApplicationScoped
+public class HibernateSessionFactory {
 
-    static {
+    private SessionFactory sessionFactory;
+
+    @PostConstruct
+    public void init() {
         try {
             Configuration configuration = new Configuration();
             // Укажите параметры подключения
             configuration.setProperty("hibernate.connection.driver_class", "org.postgresql.Driver");
-            configuration.setProperty("hibernate.connection.url", "jdbc:postgresql://" + System.getenv("DB_HOST") + ":" + System.getenv("DB_PORT") + "/" + System.getenv("DB_NAME"));
+            configuration.setProperty("hibernate.connection.url",
+                    "jdbc:postgresql://" + System.getenv("DB_HOST") + ":" +
+                            System.getenv("DB_PORT") + "/" + System.getenv("DB_NAME"));
             configuration.setProperty("hibernate.connection.username", System.getenv("DB_USERNAME"));
             configuration.setProperty("hibernate.connection.password", System.getenv("DB_PASSWORD"));
             configuration.setProperty("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
@@ -45,16 +57,18 @@ public class HibernateUtil {
 
             Metadata metadata = metadataBuilder.build();
             sessionFactory = metadata.getSessionFactoryBuilder().build();
+
         } catch (Exception e) {
-            throw new ExceptionInInitializerError("Failed to create SessionFactory: " + e);
+            throw new RuntimeException("Failed to create SessionFactory", e);
         }
     }
 
-    public static SessionFactory getSessionFactory() {
-        return sessionFactory;
+    public Session openSession() {
+        return sessionFactory.openSession();
     }
 
-    public static void shutdown() {
+    @PreDestroy
+    public void shutdown() {
         if (sessionFactory != null) {
             sessionFactory.close();
         }

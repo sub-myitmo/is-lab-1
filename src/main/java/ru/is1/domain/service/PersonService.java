@@ -44,9 +44,8 @@ public class PersonService {
 
         person.setCreationDate(LocalDateTime.now());
 
-        Person created = personDAO.save(person); // транзакция внутри DAO
+        Person created = personDAO.save(person);
 
-        // Отправка уведомления через WebSocket с текущими параметрами
         DataWebSocket.broadcastPersonChange("CREATED", created.getId());
 
         return created;
@@ -73,13 +72,11 @@ public class PersonService {
 
         Person updated = personDAO.update(person);
 
-        // Отправка уведомления через WebSocket с текущими параметрами
         DataWebSocket.broadcastPersonChange("UPDATED", updated.getId());
     }
 
     public boolean deletePerson(Long id) {
         if (personDAO.deletePersonAndAllTransitivelyRelated(id)) {
-            // Отправка уведомления через WebSocket с текущими параметрами
             DataWebSocket.broadcastPersonChange("DELETED", id);
             return true;
         }

@@ -1,8 +1,10 @@
 package ru.is1.dal.dao;
 
+import jakarta.inject.Inject;
+
+import jakarta.transaction.Transactional;
 import org.hibernate.Session;
-import org.hibernate.Transaction;
-import ru.is1.config.utils.HibernateUtil;
+import ru.is1.config.utils.HibernateSessionFactory;
 import ru.is1.dal.Identifiable;
 
 import java.util.Optional;
@@ -10,80 +12,56 @@ import java.util.Optional;
 public abstract class AbstractDAO<T extends Identifiable> {
     private final Class<T> entityClass;
 
+    @Inject
+    protected HibernateSessionFactory factory;
+
     protected AbstractDAO(Class<T> entityClass) {
         this.entityClass = entityClass;
     }
 
+    @Transactional
     public T save(T entity) {
-        Transaction tx = null;
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            tx = session.beginTransaction();
+        try (Session session = factory.openSession()) {
             if (entity.getId() == null) {
                 session.persist(entity);
             } else {
                 entity = session.merge(entity);
             }
-            tx.commit();
             return entity;
-        } catch (Exception e) {
-            if (tx != null) tx.rollback();
-            throw e;
         }
     }
 
+    @Transactional
     public T update(T entity) {
-        Transaction tx = null;
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            tx = session.beginTransaction();
-            entity = session.merge(entity);
-            tx.commit();
-            return entity;
-        } catch (Exception e) {
-            if (tx != null) tx.rollback();
-            throw e;
+        try (Session session = factory.openSession()) {
+            return session.merge(entity);
         }
     }
 
     public Optional<T> findById(Long id) {
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+        try (Session session = factory.openSession()) {
             T entity = session.get(entityClass, id);
             if (entity != null) {
-                initializeLazyFields(session, entity);
+                initializeLazyFields(entity);
             }
             return Optional.ofNullable(entity);
         }
     }
 
+    @Transactional
     public boolean delete(Long id) {
-        Transaction tx = null;
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            tx = session.beginTransaction();
+        try (Session session = factory.openSession()) {
             T entity = session.get(entityClass, id);
 
-            if (entity != null && canDelete(session, id, entity)) {
+            if (entity != null && canDelete(id, entity)) {
                 session.remove(entity);
-                tx.commit();
                 return true;
-            }
-
-            // Если не можем удалить, откатываем транзакцию
-            if (tx != null && tx.isActive()) {
-                tx.rollback();
-            }
-            return false;
-
-        } catch (Exception e) {
-            if (tx != null && tx.isActive()) {
-                tx.rollback();
             }
             return false;
         }
     }
 
-    protected boolean canDelete(Session session, Long id, T entity) {
-        return true;
-    };
+    protected abstract boolean canDelete(Long id, T entity);
 
-    protected abstract void initializeLazyFields(Session session, T entity);
-
+    protected abstract void initializeLazyFields(T entity);
 }

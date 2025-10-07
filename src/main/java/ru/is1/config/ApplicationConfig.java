@@ -4,6 +4,7 @@ import jakarta.websocket.Endpoint;
 import jakarta.websocket.server.ServerApplicationConfig;
 import jakarta.websocket.server.ServerEndpointConfig;
 import jakarta.ws.rs.ApplicationPath;
+import ru.is1.config.utils.HibernateSessionFactory;
 import ru.is1.controller.*;
 
 import java.util.HashSet;
@@ -15,7 +16,6 @@ public class ApplicationConfig extends jakarta.ws.rs.core.Application implements
     public Set<Object> getSingletons() {
         Set<Object> singletons = new HashSet<>();
         singletons.add(new CorsFilter());
-//        singletons.add(new JwtAuthenticationFilter());
         singletons.add(new JacksonConfig());
         return singletons;
     }
@@ -27,7 +27,6 @@ public class ApplicationConfig extends jakarta.ws.rs.core.Application implements
         classes.add(PersonRestController.class);
         classes.add(CoordinatesRestController.class);
         classes.add(TestResource.class);
-//        classes.add(AuthController.class);
         return classes;
     }
 
