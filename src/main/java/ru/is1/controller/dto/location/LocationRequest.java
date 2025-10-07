@@ -1,5 +1,6 @@
 package ru.is1.controller.dto.location;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import ru.is1.dal.entity.Location;
@@ -7,6 +8,7 @@ import ru.is1.dal.entity.Location;
 @Getter
 @Setter
 public class LocationRequest {
+    @NotNull(message = "X coordinate in Location cannot be null")
     private Integer x;
     private long y;
     private long z;

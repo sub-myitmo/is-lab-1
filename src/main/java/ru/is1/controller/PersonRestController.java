@@ -2,8 +2,6 @@ package ru.is1.controller;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
-//import jakarta.ws.rs.container.ContainerRequestContext;
-//import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
@@ -20,8 +18,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-//import ru.is1.dal.entity.User;
-//import ru.is1.domain.service.AuthService;
 import ru.is1.domain.service.PersonService;
 
 @Path("/persons")
@@ -100,7 +96,7 @@ public class PersonRestController {
         }
     }
 
-    @PATCH
+    @PUT
     @Path("/{id}")
     public Response updatePerson(@PathParam("id") Long id, @QueryParam("locationId") Long locationId,
                                  @QueryParam("coordinatesId") Long coordinatesId, PersonRequest request) {
@@ -258,38 +254,6 @@ public class PersonRestController {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity(new ErrorResponse(e.getMessage()))
                     .build();
-        }
-    }
-
-    private void validateEnumsPersonRequest(PersonRequest request) {
-        // Проверка eyeColor
-        if (request.getEyeColor() != null) {
-            try {
-                Color.valueOf(request.getEyeColor().toUpperCase());
-            } catch (IllegalArgumentException e) {
-                throw new IllegalArgumentException("Invalid eye color: " + request.getEyeColor() +
-                        ". Allowed values: " + Arrays.toString(Color.values()));
-            }
-        }
-
-        // Проверка hairColor
-        if (request.getHairColor() != null) {
-            try {
-                Color.valueOf(request.getHairColor().toUpperCase());
-            } catch (IllegalArgumentException e) {
-                throw new IllegalArgumentException("Invalid hair color: " + request.getEyeColor() +
-                        ". Allowed values: " + Arrays.toString(Color.values()));
-            }
-        }
-
-        // Проверка nationality
-        if (request.getNationality() != null) {
-            try {
-                Country.valueOf(request.getNationality().toUpperCase());
-            } catch (IllegalArgumentException e) {
-                throw new IllegalArgumentException("Invalid nationality: " + request.getNationality() +
-                        ". Allowed values: " + Arrays.toString(Country.values()));
-            }
         }
     }
 }

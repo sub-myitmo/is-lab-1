@@ -30,8 +30,6 @@ public class PersonService {
     }
 
     public Person createPerson(Person person, Long locationId, Long coordinatesId) {
-        validatePerson(person);
-
         if (locationId != null) {
             Location location = locationService.getLocationById(locationId)
                     .orElseThrow(() -> new IllegalArgumentException("Location not found"));
@@ -55,7 +53,6 @@ public class PersonService {
     }
 
     public void updatePerson(Person person, Long locationId, Long coordinatesId) {
-        validatePerson(person);
         if (person.getId() == null) {
             throw new IllegalArgumentException("Person ID cannot be null for update");
         }
@@ -126,12 +123,4 @@ public class PersonService {
         return personDAO.search(first, pageSize, field, namePattern, direction);
     }
 
-    private void validatePerson(Person person) {
-        if (person == null) throw new IllegalArgumentException("Person cannot be null");
-        if (person.getName() == null || person.getName().trim().isEmpty()) {
-            throw new IllegalArgumentException("Name cannot be empty");
-        }
-        if (person.getHeight() <= 0) throw new IllegalArgumentException("Height must be > 0");
-        if (person.getWeight() <= 0) throw new IllegalArgumentException("Weight must be > 0");
-    }
 }

@@ -75,7 +75,7 @@ public class LocationDAO extends AbstractDAO<Location> {
     }
 
 
-    public boolean isLocationUsed(Long locationId) {
+    private boolean isLocationUsed(Long locationId) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             Long count = session.createSelectionQuery(
                             "SELECT COUNT(p) FROM Person p WHERE p.location.id = :locationId", Long.class)

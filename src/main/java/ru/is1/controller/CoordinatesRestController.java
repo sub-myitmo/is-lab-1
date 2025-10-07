@@ -66,21 +66,4 @@ public class CoordinatesRestController {
                     .build();
         }
     }
-
-
-//    @GET
-//    @Path("/available-coordinates")
-//    public Response getAvailableCoordinates() {
-//        try {
-//            List<Coordinates> coordinates = coordinatesService.getAllCoordinates();
-//            List<CoordinatesResponse> response = coordinates.stream()
-//                    .map(CoordinatesResponse::fromEntity)
-//                    .toList();
-//            return Response.ok(response).build();
-//        } catch (Exception e) {
-//            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-//                    .entity(new ErrorResponse(e.getMessage()))
-//                    .build();
-//        }
-//    }
 }

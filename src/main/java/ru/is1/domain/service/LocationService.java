@@ -17,7 +17,6 @@ public class LocationService {
     private LocationDAO locationDAO;
 
     public Location createLocation(Location location) {
-        validateLocation(location);
         return locationDAO.save(location);
     }
 
@@ -34,24 +33,11 @@ public class LocationService {
     }
 
     public Location updateLocation(Long id, Location location) {
-        validateLocation(location);
         location.setId(id);
         return locationDAO.save(location);
     }
 
     public boolean deleteLocation(Long id) {
-        if (locationDAO.isLocationUsed(id)) {
-            throw new IllegalStateException("Cannot delete location used by persons");
-        }
         return locationDAO.delete(id);
-    }
-
-    public boolean isLocationUsed(Long locationId) {
-        return locationDAO.isLocationUsed(locationId);
-    }
-
-    private void validateLocation(Location location) {
-        if (location == null) throw new IllegalArgumentException("Location cannot be null");
-        if (location.getX() == null) throw new IllegalArgumentException("Location X cannot be null");
     }
 }

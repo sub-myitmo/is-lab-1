@@ -65,7 +65,7 @@ public class CoordinatesDAO extends AbstractDAO<Coordinates> {
         }
     }
 
-    public boolean isCoordinatesUsed(Long coordinatesId) {
+    private boolean isCoordinatesUsed(Long coordinatesId) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             Long count = session.createSelectionQuery(
                             "SELECT COUNT(p) FROM Person p WHERE p.coordinates.id = :coordinatesId", Long.class)
