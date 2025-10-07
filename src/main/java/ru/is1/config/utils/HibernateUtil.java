@@ -1,14 +1,14 @@
 package ru.is1.config.utils;
 
-
 import org.hibernate.SessionFactory;
+import org.hibernate.boot.Metadata;
+import org.hibernate.boot.MetadataBuilder;
+import org.hibernate.boot.MetadataSources;
 import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
-import ru.is1.dal.entity.Person;
-import ru.is1.dal.entity.Location;
-import ru.is1.dal.entity.Coordinates;
-//import ru.is1.dal.entity.User;
+import ru.is1.dal.entity.Color;
+import ru.is1.dal.entity.Country;
 
 public class HibernateUtil {
     private static SessionFactory sessionFactory;
@@ -26,17 +26,25 @@ public class HibernateUtil {
             configuration.setProperty("hibernate.show_sql", "false");
             configuration.setProperty("hibernate.format_sql", "true");
 
-            // Явно зарегистрируйте сущности
-            configuration.addAnnotatedClass(Person.class);
-            configuration.addAnnotatedClass(Location.class);
-            configuration.addAnnotatedClass(Coordinates.class);
-//            configuration.addAnnotatedClass(User.class);
+            // Регистрируем кастомные типы через MetadataBuilder
+            MetadataSources metadataSources = new MetadataSources(
+                    new StandardServiceRegistryBuilder()
+                            .applySettings(configuration.getProperties())
+                            .build()
+            );
 
-            StandardServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
-                    .applySettings(configuration.getProperties())
-                    .build();
+            metadataSources.addResource("Person.hbm.xml");
+            metadataSources.addResource("Location.hbm.xml");
+            metadataSources.addResource("Coordinates.hbm.xml");
 
-            sessionFactory = configuration.buildSessionFactory(serviceRegistry);
+            MetadataBuilder metadataBuilder = metadataSources.getMetadataBuilder();
+
+            // Регистрируем кастомные типы
+            metadataBuilder.applyBasicType(new GenericEnumType<>(Color.class), "color_enum");
+            metadataBuilder.applyBasicType(new GenericEnumType<>(Country.class), "country_enum");
+
+            Metadata metadata = metadataBuilder.build();
+            sessionFactory = metadata.getSessionFactoryBuilder().build();
         } catch (Exception e) {
             throw new ExceptionInInitializerError("Failed to create SessionFactory: " + e);
         }
