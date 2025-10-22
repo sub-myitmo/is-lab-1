@@ -17,6 +17,7 @@ import ru.is1.dal.entity.Person;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import ru.is1.domain.service.PersonService;
 
@@ -24,27 +25,8 @@ import ru.is1.domain.service.PersonService;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class PersonRestController {
-
-//    @Context
-//    private ContainerRequestContext requestContext;
-
     @Inject
     private PersonService personService;
-
-//    @Inject
-//    private AuthService authService;
-
-    // Метод для получения текущего пользователя
-//    private User getCurrentUser() {
-//        String username = (String) requestContext.getProperty("username");
-//        if (username == null) {
-//            throw new SecurityException("User not authenticated");
-//        }
-//
-//        return authService.getUserByUsername(username)
-//                .orElseThrow(() -> new SecurityException("User not found"));
-//    }
-
 
     @GET
     public Response getAllPersons(
@@ -55,6 +37,27 @@ public class PersonRestController {
             @QueryParam("direction") @DefaultValue("asc") String direction) {
 
         try {
+            if (!isValidDirection(direction)) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity(new ErrorResponse("Invalid direction parameter. Must be 'asc' or 'desc'"))
+                        .build();
+            }
+
+            // Валидация параметра field в зависимости от наличия search
+            if (search != null && !search.trim().isEmpty()) {
+                if (!isValidSearchField(field)) {
+                    return Response.status(Response.Status.BAD_REQUEST)
+                            .entity(new ErrorResponse("Invalid field parameter for search. Must be one of: name, passportID, nationality, eyeColor, hairColor"))
+                            .build();
+                }
+            } else {
+                if (!isValidSortField(field)) {
+                    return Response.status(Response.Status.BAD_REQUEST)
+                            .entity(new ErrorResponse("Invalid field parameter for sorting. Must be one of: id, name, passportID, nationality, eyeColor, hairColor, height, weight, creationDate"))
+                            .build();
+                }
+            }
+
             List<Person> persons;
             if (search != null && !search.trim().isEmpty()) {
                 persons = personService.searchPersons(page * size, size, field, search, direction);
@@ -169,91 +172,18 @@ public class PersonRestController {
         }
     }
 
-    // Special operations endpoints
-    @GET
-    @Path("/min-passport")
-    public Response getPersonWithMinPassportID() {
-        try {
-            Optional<Person> person = personService.findPersonWithMinPassportID();
-            if (person.isPresent()) {
-                return Response.ok(PersonResponse.fromEntity(person.get())).build();
-            } else {
-                return Response.status(Response.Status.NOT_FOUND)
-                        .entity(new ErrorResponse("No persons found"))
-                        .build();
-            }
-        } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(new ErrorResponse(e.getMessage()))
-                    .build();
-        }
+
+    private boolean isValidDirection(String direction) {
+        return "asc".equalsIgnoreCase(direction) || "desc".equalsIgnoreCase(direction);
     }
 
-    @GET
-    @Path("/count/nationality-less-than/{nationality}")
-    public Response countNationalityLessThan(@PathParam("nationality") String nationality) {
-        try {
-            Country nationalityEnum = Country.valueOf(nationality.toUpperCase());
-            long count = personService.countPersonsWithNationalityLessThan(nationalityEnum);
-            return Response.ok(new CountResponse(count)).build();
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Invalid nationality: " + nationality +
-                    ". Allowed values: " + Arrays.toString(Country.values()));
-        } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(new ErrorResponse(e.getMessage()))
-                    .build();
-        }
+    private boolean isValidSearchField(String field) {
+        Set<String> validSearchFields = Set.of("name", "passportID", "nationality", "eyeColor", "hairColor");
+        return validSearchFields.contains(field);
     }
 
-    @GET
-    @Path("/count/nationality-greater-than/{nationality}")
-    public Response countNationalityGreaterThan(@PathParam("nationality") String nationality) {
-        try {
-            Country nationalityEnum = Country.valueOf(nationality.toUpperCase());
-            long count = personService.countPersonsWithNationalityGreaterThan(nationalityEnum);
-            return Response.ok(new CountResponse(count)).build();
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Invalid nationality: " + nationality +
-                    ". Allowed values: " + Arrays.toString(Country.values()));
-        } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(new ErrorResponse(e.getMessage()))
-                    .build();
-        }
-    }
-
-    @GET
-    @Path("/count/hair-color/{hairColor}")
-    public Response countByHairColor(@PathParam("hairColor") String hairColor) {
-        try {
-            Color colorEnum = Color.valueOf(hairColor.toUpperCase());
-            long count = personService.countPersonsWithHairColor(colorEnum);
-            return Response.ok(new CountResponse(count)).build();
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Invalid hair color: " + hairColor +
-                    ". Allowed values: " + Arrays.toString(Color.values()));
-        } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(new ErrorResponse(e.getMessage()))
-                    .build();
-        }
-    }
-
-    @GET
-    @Path("/count/eye-color/{eyeColor}")
-    public Response countByEyeColor(@PathParam("eyeColor") String eyeColor) {
-        try {
-            Color colorEnum = Color.valueOf(eyeColor.toUpperCase());
-            long count = personService.countPersonsWithEyeColor(colorEnum);
-            return Response.ok(new CountResponse(count)).build();
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Invalid eye color: " + eyeColor +
-                    ". Allowed values: " + Arrays.toString(Color.values()));
-        } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(new ErrorResponse(e.getMessage()))
-                    .build();
-        }
+    private boolean isValidSortField(String field) {
+        Set<String> validSortFields = Set.of("id", "name", "passportID", "nationality", "eyeColor", "hairColor", "height", "weight", "creationDate");
+        return validSortFields.contains(field);
     }
 }

@@ -28,30 +28,6 @@ function App() {
     const [selectedPerson, setSelectedPerson] = useState(null);
     const [editingPerson, setEditingPerson] = useState(null);
 
-    // useEffect(() => {
-    //     loadPersons();
-    // }, [currentPage, pageSize, searchTerm, searchField, sortField, sortDirection]);
-    //
-    // const loadPersons = async () => {
-    //     setLoading(true);
-    //     try {
-    //         const response = await personService.getAll(currentPage, pageSize, searchTerm, searchTerm === '' ? sortField : searchField, sortDirection);
-    //         console.log(response.data);
-    //         setPersons(response.data.persons || []);
-    //         setTotalItems(response.data.totalCount || 0);
-    //     } catch (error) {
-    //         console.error('Error loading persons:', error);
-    //         alert('Error loading persons: ' + error.message);
-    //     } finally {
-    //         setLoading(false);
-    //     }
-    // };
-// Refs для хранения текущих данных без триггеринга ререндеров
-    const currentPersonsRef = useRef([]);
-    const currentParamsRef = useRef({});
-
-    // WebSocket
-    const {isConnected, lastMessage} = useWebSocket(WS_URL);
 
     // Загрузка данных
     const loadPersons = useCallback(async () => {
@@ -69,19 +45,10 @@ function App() {
             setPersons(personsData);
             setTotalItems(response.data.totalCount || 0);
 
-            // Сохраняем текущие данные в refs
-            currentPersonsRef.current = personsData;
-            currentParamsRef.current = {
-                page: currentPage,
-                size: pageSize,
-                search: searchTerm,
-                field: searchTerm === '' ? sortField : searchField,
-                direction: sortDirection
-            };
 
         } catch (error) {
             console.error('Error loading persons:', error);
-            alert('Error loading persons: ' + error.message);
+            // alert('Error loading persons: ' + error.message);
         } finally {
             setLoading(false);
         }
@@ -92,55 +59,25 @@ function App() {
         loadPersons();
     }, [loadPersons]);
 
-    // Обработка WebSocket сообщений
-    useEffect(() => {
-        if (lastMessage) {
-            handleWebSocketMessage(lastMessage);
-        }
-    }, [lastMessage]);
 
-    const handleWebSocketMessage = (message) => {
-        console.log('🔄 Processing WebSocket message:', message);
 
-        const [action, personIdStr] = message.split(':');
-        const personId = parseInt(personIdStr);
-
-        switch (action) {
-            case 'PERSON_CREATED':
-                handlePersonCreated(personId);
-                break;
-
-            case 'PERSON_UPDATED':
-                handlePersonUpdated(personId);
-                break;
-
-            case 'PERSON_DELETED':
-                handlePersonDeleted(personId);
-                break;
-
-            default:
-                console.log('Unknown action:', action);
-        }
-    };
-
-    const handlePersonCreated = async (personId) => {
+    const handlePersonCreated = useCallback(async (personId) => {
         console.log('Person created: id=', personId);
 
         // всегда перезагружаем - может надо добавить новую страницу внизу / новый Person станет подходить под фильтры
         await loadPersons();
-    };
+    }, [loadPersons]);
 
-    const handlePersonUpdated = async (personId) => {
+    const handlePersonUpdated = useCallback(async (personId) => {
         console.log('Person updated: id=', personId);
 
         // нет смысла точечно обновлять, поскольку Person может перестать подходить по фильтрам
         await loadPersons();
         // Если мы редактируем эту персону, закрываем форму
         if (editingPerson && editingPerson.id === personId) {
-            console.log('🚫 Closing edit form - person was updated by another user');
+            console.log('🚫 Closing edit form - person was updated');
             setShowPersonForm(false);
             setEditingPerson(null);
-            alert('This person was updated by another user. Please review changes.');
         }
 
         // Если мы просматриваем эту персону, обновляем данные
@@ -153,9 +90,9 @@ function App() {
                 console.error('Error refreshing person view:', error);
             }
         }
-    };
+    }, [loadPersons]);
 
-    const handlePersonDeleted = async (personId) => {
+    const handlePersonDeleted = useCallback(async (personId) => {
         console.log('Person deleted: id=', personId);
 
         // после удаления может понадобиться обновить количество элементов
@@ -168,9 +105,48 @@ function App() {
             setShowPersonView(false);
             setEditingPerson(null);
             setSelectedPerson(null);
-            alert('This person was deleted by another user.');
         }
-    };
+    }, [loadPersons]);
+
+    // Обработка WebSocket сообщений
+    const handleWebSocketMessage = useCallback((message) => {
+        console.log('🔄 WebSocket callback received:', message);
+
+        const msg = JSON.parse(message);
+        const action = msg.type;
+        const personIdStr = msg.id;
+        const entity = msg.entity;
+        const personId = parseInt(personIdStr);
+
+        console.log('Action:', action, entity, 'ID:', personId);
+
+        if (entity === "Person") {
+            switch (action) {
+                case 'CREATED':
+                    console.log('Calling handlePersonCreated');
+                    handlePersonCreated(personId);
+                    break;
+
+                case 'UPDATED':
+                    console.log('Calling handlePersonUpdated');
+                    handlePersonUpdated(personId);
+                    break;
+
+                case 'DELETED':
+                    console.log('Calling handlePersonDeleted');
+                    handlePersonDeleted(personId);
+                    break;
+
+                default:
+                    console.log('❓ Unknown action:', action);
+            }
+        }
+    }, [handlePersonCreated, handlePersonUpdated, handlePersonDeleted]);
+
+
+    // WebSocket
+    const { isConnected } = useWebSocket(WS_URL, handleWebSocketMessage);
+
 
     const handleSearch = (term, field) => {
         setSearchTerm(term);
@@ -209,9 +185,9 @@ function App() {
             try {
                 await personService.delete(person.id);
                 await loadPersons();
-                alert('Person deleted successfully');
+                // alert('Person deleted successfully');
             } catch (error) {
-                alert('Error deleting person: ' + error.message);
+                // alert('Error deleting person: ' + error.message);
             }
         }
     };
@@ -220,7 +196,7 @@ function App() {
         setShowPersonForm(false);
         setEditingPerson(null);
         await loadPersons();
-        alert(`Person ${savedPerson.id ? 'created' : 'updated'} successfully`);
+        console.log(`Person ${savedPerson.id ? 'created' : 'updated'} successfully`);
     };
 
     const handleCancelForm = () => {

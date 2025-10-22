@@ -12,8 +12,11 @@ export const Country = {
     INDIA: 'INDIA'
 };
 
-export const API_BASE_URL = 'http://localhost:20568/person-management/api';
-export const WS_URL = 'ws://localhost:20568/person-management/websocket';
+export const API_BASE_URL = 'http://127.0.0.1:20568/person-management/api';
+export const WS_URL = 'ws://127.0.0.1:20568/person-management/websocket';
+
+// export const API_BASE_URL = '/api';
+// export const WS_URL = '/ws';
 
 
 export const FIELDS = [

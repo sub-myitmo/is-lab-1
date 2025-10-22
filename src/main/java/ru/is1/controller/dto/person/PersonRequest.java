@@ -49,15 +49,15 @@ public class PersonRequest {
         entity.setName(request.getName());
         entity.setWeight(request.getWeight());
         entity.setPassportID(request.getPassportID());
-        entity.setEyeColor(Color.valueOf(request.getEyeColor().toUpperCase()));
+        entity.setEyeColor(request.getEyeColor().toUpperCase());
 
         if (request.getHairColor() != null && !request.getHairColor().trim().isEmpty()) {
-            entity.setHairColor(Color.valueOf(request.getHairColor().toUpperCase()));
+            entity.setHairColor(request.getHairColor().toUpperCase());
         } else {
             entity.setHairColor(null);
         }
 
-        entity.setNationality(Country.valueOf(request.getNationality().toUpperCase()));
+        entity.setNationality(request.getNationality().toUpperCase());
         return entity;
     }
 

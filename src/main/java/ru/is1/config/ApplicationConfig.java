@@ -4,33 +4,15 @@ import jakarta.websocket.Endpoint;
 import jakarta.websocket.server.ServerApplicationConfig;
 import jakarta.websocket.server.ServerEndpointConfig;
 import jakarta.ws.rs.ApplicationPath;
-import ru.is1.config.utils.HibernateSessionFactory;
-import ru.is1.controller.*;
+import jakarta.ws.rs.core.Application;
+import ru.is1.config.ws.DataWebSocket;
 
 import java.util.HashSet;
 import java.util.Set;
 
 @ApplicationPath("/api")
-public class ApplicationConfig extends jakarta.ws.rs.core.Application implements ServerApplicationConfig {
-    @Override
-    public Set<Object> getSingletons() {
-        Set<Object> singletons = new HashSet<>();
-        singletons.add(new CorsFilter());
-        singletons.add(new JacksonConfig());
-        return singletons;
-    }
-
-    @Override
-    public Set<Class<?>> getClasses() {
-        Set<Class<?>> classes = new HashSet<>();
-        classes.add(LocationRestController.class);
-        classes.add(PersonRestController.class);
-        classes.add(CoordinatesRestController.class);
-        classes.add(TestResource.class);
-        return classes;
-    }
-
-    // Методы для WebSocket конфигурации
+public class ApplicationConfig extends Application implements ServerApplicationConfig {
+    // WebSocket конфигурация
     @Override
     public Set<ServerEndpointConfig> getEndpointConfigs(Set<Class<? extends Endpoint>> endpointClasses) {
         return new HashSet<>(); // Возвращаем пустой Set, используем аннотированные классы

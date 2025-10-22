@@ -2,8 +2,6 @@ package ru.is1.domain.service;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import ru.is1.config.DataWebSocket;
-import ru.is1.config.aop.MonitorPerformance;
 import ru.is1.dal.dao.PersonDAO;
 import ru.is1.dal.entity.*;
 
@@ -12,7 +10,6 @@ import java.util.List;
 import java.util.Optional;
 
 @ApplicationScoped
-@MonitorPerformance
 public class PersonService {
 
     @Inject
@@ -30,57 +27,43 @@ public class PersonService {
     }
 
     public Person createPerson(Person person, Long locationId, Long coordinatesId) {
-        if (locationId != null) {
-            Location location = locationService.getLocationById(locationId)
-                    .orElseThrow(() -> new IllegalArgumentException("Location not found"));
-            person.setLocation(location);
-        }
-
-        if (coordinatesId != null) {
-            Coordinates coordinates = coordinatesService.getCoordinatesById(coordinatesId)
-                    .orElseThrow(() -> new IllegalArgumentException("Coordinates not found"));
-            person.setCoordinates(coordinates);
-        }
-
+        checkLocationAndCoordinates(person, locationId, coordinatesId);
         person.setCreationDate(LocalDateTime.now());
 
-        Person created = personDAO.save(person);
-
-        DataWebSocket.broadcastPersonChange("CREATED", created.getId());
-
-        return created;
+        return personDAO.save(person);
     }
+
 
     public void updatePerson(Person person, Long locationId, Long coordinatesId) {
         if (person.getId() == null) {
             throw new IllegalArgumentException("Person ID cannot be null for update");
         }
 
-        if (locationId != null) {
-            Location location = locationService.getLocationById(locationId)
-                    .orElseThrow(() -> new IllegalArgumentException("Location not found"));
-            person.setLocation(location);
+        checkLocationAndCoordinates(person, locationId, coordinatesId);
+
+        Optional<Person> personOptional = getPersonById(person.getId());
+        if (personOptional.isPresent()) {
+            person.setCreationDate(personOptional.get().getCreationDate());
+            personDAO.update(person);
+        } else {
+            throw new IllegalArgumentException("Person not found with id: " + person.getId());
         }
-
-        if (coordinatesId != null) {
-            Coordinates coordinates = coordinatesService.getCoordinatesById(coordinatesId)
-                    .orElseThrow(() -> new IllegalArgumentException("Coordinates not found"));
-            person.setCoordinates(coordinates);
-        }
-
-        person.setCreationDate(getPersonById(person.getId()).get().getCreationDate());
-
-        Person updated = personDAO.update(person);
-
-        DataWebSocket.broadcastPersonChange("UPDATED", updated.getId());
     }
 
-    public boolean deletePerson(Long id) {
-        if (personDAO.deletePersonAndAllTransitivelyRelated(id)) {
-            DataWebSocket.broadcastPersonChange("DELETED", id);
-            return true;
+    private void checkLocationAndCoordinates(Person person, Long locationId, Long coordinatesId) {
+        if (locationId != null) {
+            Location location = locationService.getLocationById(locationId).orElseThrow(() -> new IllegalArgumentException("Location not found"));
+            person.setLocation(location);
         }
-        return false;
+        if (coordinatesId != null) {
+            Coordinates coordinates = coordinatesService.getCoordinatesById(coordinatesId).orElseThrow(() -> new IllegalArgumentException("Coordinates not found"));
+            person.setCoordinates(coordinates);
+        }
+    }
+
+
+    public boolean deletePerson(Long id) {
+        return personDAO.deletePersonAndAllTransitivelyRelated(id);
     }
 
     public List<Person> getPersonsPaginated(int first, int size, String field, String direction) {
@@ -93,27 +76,6 @@ public class PersonService {
 
     public Optional<Long> findByPassportID(String passportID) {
         return personDAO.findByPassportID(passportID);
-    }
-
-    // Специальные операции
-    public Optional<Person> findPersonWithMinPassportID() {
-        return personDAO.findMinPassportID();
-    }
-
-    public long countPersonsWithNationalityLessThan(Country nationality) {
-        return personDAO.countByNationalityLessThan(nationality);
-    }
-
-    public long countPersonsWithNationalityGreaterThan(Country nationality) {
-        return personDAO.countByNationalityGreaterThan(nationality);
-    }
-
-    public long countPersonsWithHairColor(Color hairColor) {
-        return personDAO.countByHairColor(hairColor);
-    }
-
-    public long countPersonsWithEyeColor(Color eyeColor) {
-        return personDAO.countByEyeColor(eyeColor);
     }
 
     public List<Person> searchPersons(int first, int pageSize, String field, String namePattern, String direction) {

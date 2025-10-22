@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings xmlns="https://jakarta.ee/xml/ns/persistence/orm"
+                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence/orm
+                                     https://jakarta.ee/xml/ns/persistence/orm_3_0.xsd"
+                 version="3.0">
+
+    <entity class="ru.is1.dal.entity.Person" access="PROPERTY">
+        <table name="persons"/>
+
+        <attributes>
+            <id name="id">
+                <generated-value strategy="IDENTITY"/>
+            </id>
+
+            <basic name="name">
+                <column name="name" nullable="false"/>
+            </basic>
+
+            <basic name="creationDate">
+                <column name="creation_date" nullable="false"/>
+            </basic>
+
+            <basic name="eyeColor">
+                <column name="eye_color" nullable="false"/>
+            </basic>
+
+            <basic name="hairColor">
+                <column name="hair_color"/>
+            </basic>
+
+            <basic name="height">
+                <column name="height" nullable="false"/>
+            </basic>
+
+            <basic name="weight">
+                <column name="weight" nullable="false"/>
+            </basic>
+
+            <basic name="passportID">
+                <column name="passport_id" nullable="false" unique="true"/>
+            </basic>
+
+            <basic name="nationality">
+                <column name="nationality" nullable="false"/>
+            </basic>
+
+            <many-to-one name="coordinates" target-entity="ru.is1.dal.entity.Coordinates" fetch="EAGER">
+                <join-column name="coordinates_id" nullable="false"/>
+            </many-to-one>
+
+            <many-to-one name="location" target-entity="ru.is1.dal.entity.Location" fetch="EAGER">
+                <join-column name="location_id" nullable="false"/>
+            </many-to-one>
+        </attributes>
+    </entity>
+
+</entity-mappings>

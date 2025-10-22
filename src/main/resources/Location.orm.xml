@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings xmlns="https://jakarta.ee/xml/ns/persistence/orm"
+                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence/orm
+                                     https://jakarta.ee/xml/ns/persistence/orm_3_0.xsd"
+                 version="3.0">
+
+    <entity class="ru.is1.dal.entity.Location" access="PROPERTY">
+        <table name="locations"/>
+
+        <attributes>
+            <id name="id">
+                <generated-value strategy="IDENTITY"/>
+            </id>
+
+            <basic name="x">
+                <column name="x" nullable="false"/>
+            </basic>
+            <basic name="y">
+                <column name="y"/>
+            </basic>
+            <basic name="z">
+                <column name="z"/>
+            </basic>
+
+            <one-to-many name="persons" mapped-by="location" orphan-removal="true">
+                <cascade>
+                    <cascade-all/>
+                </cascade>
+            </one-to-many>
+        </attributes>
+    </entity>
+
+</entity-mappings>

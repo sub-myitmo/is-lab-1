@@ -32,9 +32,9 @@ public class PersonResponse {
         response.setName(entity.getName());
         response.setWeight(entity.getWeight());
         response.setPassportID(entity.getPassportID());
-        response.setEyeColor(entity.getEyeColor().getDisplayName());
-        response.setHairColor(entity.getHairColor() != null ? entity.getHairColor().getDisplayName() : null);
-        response.setNationality(entity.getNationality().getDisplayName());
+        response.setEyeColor(entity.getEyeColor());
+        response.setHairColor(entity.getHairColor() != null ? entity.getHairColor() : null);
+        response.setNationality(entity.getNationality());
         response.setLocation(LocationResponse.fromEntity(entity.getLocation()));
         response.setCoordinates(CoordinatesResponse.fromEntity(entity.getCoordinates()));
         response.setCreationDate(entity.getCreationDate());

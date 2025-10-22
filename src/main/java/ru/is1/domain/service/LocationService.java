@@ -2,7 +2,6 @@ package ru.is1.domain.service;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import ru.is1.config.aop.MonitorPerformance;
 import ru.is1.dal.dao.LocationDAO;
 import ru.is1.dal.entity.Location;
 
@@ -10,7 +9,6 @@ import java.util.List;
 import java.util.Optional;
 
 @ApplicationScoped
-@MonitorPerformance
 public class LocationService {
 
     @Inject

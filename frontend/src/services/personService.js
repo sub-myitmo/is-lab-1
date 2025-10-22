@@ -20,27 +20,13 @@ export const personService = {
         if (locationId) params.append('locationId', locationId);
         if (coordinatesId) params.append('coordinatesId', coordinatesId);
 
-        return api.patch(`/persons/${id}?${params.toString()}`, person);
+        return api.put(`/persons/${id}?${params.toString()}`, person);
     },
 
     delete: (id) => api.delete(`/persons/${id}`),
 
     checkPassportID: (passportID) => api.get(`/persons/check/${passportID}`),
 
-    // Special operations
-    getMinPassport: () => api.get('/persons/min-passport'),
-
-    countNationalityLessThan: (nationality) =>
-        api.get(`/persons/count/nationality-less-than/${nationality}`),
-
-    countNationalityGreaterThan: (nationality) =>
-        api.get(`/persons/count/nationality-greater-than/${nationality}`),
-
-    countByHairColor: (hairColor) =>
-        api.get(`/persons/count/hair-color/${hairColor}`),
-
-    countByEyeColor: (eyeColor) =>
-        api.get(`/persons/count/eye-color/${eyeColor}`),
 
     // Location operations
     getLocations: () => api.get('/locations'),

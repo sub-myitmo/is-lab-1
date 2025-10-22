@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Color, Country } from '../../utils/constants';
-import personService from '../../services/personService';
 import '../styles/SpecialOperations.css';
+import operationService from "../../services/operationsService.js";
 
 const SpecialOperationsPanel = () => {
     const [operationResult, setOperationResult] = useState(null);
@@ -18,7 +18,7 @@ const SpecialOperationsPanel = () => {
             let result;
             switch (operation) {
                 case 'minPassport':
-                    result = await personService.getMinPassport();
+                    result = await operationService.getMinPassport();
                     setOperationResult({
                         type: 'Person with Min Passport',
                         data: result.data
@@ -30,7 +30,7 @@ const SpecialOperationsPanel = () => {
                         alert('Please select nationality');
                         return;
                     }
-                    result = await personService.countNationalityLessThan(selectedNationality);
+                    result = await operationService.countNationalityLessThan(selectedNationality);
                     setOperationResult({
                         type: `Count where nationality < ${selectedNationality}`,
                         data: result.data.count
@@ -42,7 +42,7 @@ const SpecialOperationsPanel = () => {
                         alert('Please select nationality');
                         return;
                     }
-                    result = await personService.countNationalityGreaterThan(selectedNationality);
+                    result = await operationService.countNationalityGreaterThan(selectedNationality);
                     setOperationResult({
                         type: `Count where nationality > ${selectedNationality}`,
                         data: result.data.count
@@ -54,7 +54,7 @@ const SpecialOperationsPanel = () => {
                         alert('Please select hair color');
                         return;
                     }
-                    result = await personService.countByHairColor(selectedHairColor);
+                    result = await operationService.countByHairColor(selectedHairColor);
                     setOperationResult({
                         type: `Count with hair color ${selectedHairColor}`,
                         data: result.data.count
@@ -66,7 +66,7 @@ const SpecialOperationsPanel = () => {
                         alert('Please select eye color');
                         return;
                     }
-                    result = await personService.countByEyeColor(selectedEyeColor);
+                    result = await operationService.countByEyeColor(selectedEyeColor);
                     setOperationResult({
                         type: `Count with eye color ${selectedEyeColor}`,
                         data: result.data.count
