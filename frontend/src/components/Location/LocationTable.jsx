@@ -1,10 +1,9 @@
 import React, { useState, useMemo } from 'react';
-import { formatDate, getDisplayName } from '../../utils/helpers';
-import {PERSON_FIELDS} from '../../utils/constants';
+import {LOCATION_FIELDS} from '../../utils/constants';
 import '../styles/PersonTable.css';
 
-const PersonTable = ({
-                         persons,
+const LocationTable = ({
+                         locations,
                          onEdit,
                          onDelete,
                          onView,
@@ -12,7 +11,7 @@ const PersonTable = ({
                          sortField,
                          sortDirection
                      }) => {
-    const [selectedPerson, setSelectedPerson] = useState(null);
+    const [selectedLocation, setSelectedLocation] = useState(null);
 
     const handleSort = (field) => {
         if (onSort) {
@@ -25,10 +24,10 @@ const PersonTable = ({
         return sortDirection === 'asc' ? '↑' : '↓';
     };
 
-    if (!persons || persons.length === 0) {
+    if (!locations || locations.length === 0) {
         return (
             <div className="no-data">
-                <p>No persons found</p>
+                <p>No locations found</p>
             </div>
         );
     }
@@ -38,7 +37,7 @@ const PersonTable = ({
             <table className="person-table">
                 <thead>
                 <tr>
-                    {PERSON_FIELDS.map(column => (
+                    {LOCATION_FIELDS.map(column => (
                         <th key={column.key}>
                             {column.sortable ? (
                                 <button
@@ -55,36 +54,29 @@ const PersonTable = ({
                 </tr>
                 </thead>
                 <tbody>
-                {persons.map(person => (
-                    <tr key={person.id} className={selectedPerson === person.id ? 'selected' : ''}>
-                        <td>{person.id}</td>
-                        <td>{person.name}</td>
-                        <td>{person.passportID}</td>
-                        <td>{getDisplayName(person.nationality)}</td>
-                        <td>{getDisplayName(person.eyeColor)}</td>
-                        <td>{getDisplayName(person.hairColor)}</td>
-                        <td>{person.height} cm</td>
-                        <td>{person.weight} kg</td>
-                        <td>{formatDate(person.creationDate)}</td>
-                        <td>({person.location.x}, {person.location.y}, {person.location.z})</td>
-                        <td>({person.coordinates.x}, {person.coordinates.y})</td>
+                {locations.map(location => (
+                    <tr key={location.id} className={selectedLocation === location.id ? 'selected' : ''}>
+                        <td>{location.id}</td>
+                        <td>{location.x}</td>
+                        <td>{location.y}</td>
+                        <td>{location.z}</td>
                         <td className="actions">
                             <button
-                                onClick={() => onView(person)}
+                                onClick={() => onView(location)}
                                 className="btn-view"
                                 title="View details"
                             >
                                 👁️
                             </button>
                             <button
-                                onClick={() => onEdit(person)}
+                                onClick={() => onEdit(location)}
                                 className="btn-edit"
                                 title="Edit"
                             >
                                 ✏️
                             </button>
                             <button
-                                onClick={() => onDelete(person)}
+                                onClick={() => onDelete(location)}
                                 className="btn-delete"
                                 title="Delete"
                             >
@@ -99,4 +91,4 @@ const PersonTable = ({
     );
 };
 
-export default PersonTable;
+export default LocationTable;

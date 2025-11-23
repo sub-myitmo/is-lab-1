@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {debounce} from '../../utils/helpers';
 import '../styles/SearchBar.css';
-import {FIELDS} from "../../utils/constants.js";
+import {PERSON_FIELDS} from "../../utils/constants.js";
 
 const SearchBar = ({onSearch, term, field}) => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -55,7 +55,7 @@ const SearchBar = ({onSearch, term, field}) => {
                         value={searchField}
                         onChange={(e) => handleChangeField(e)}
                     >
-                        {FIELDS
+                        {PERSON_FIELDS
                             .filter(field => field.filterable === true)
                             .map(field => (
                                 <option key={field.key} value={field.key}>

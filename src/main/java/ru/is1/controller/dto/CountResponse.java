@@ -1,4 +1,4 @@
-package ru.is1.controller.dto.person;
+package ru.is1.controller.dto;
 
 public class CountResponse {
     public long count;

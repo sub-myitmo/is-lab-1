@@ -2,6 +2,7 @@ package ru.is1.config.ws;
 
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.json.Json;
 import jakarta.websocket.Session;
 
 import java.util.Set;
@@ -14,7 +15,13 @@ public class Broadcaster {
     public void register(Session s)    { sessions.add(s); }
     public void unregister(Session s)  { sessions.remove(s); }
 
-    public void broadcast(String json) {
+    public void broadcast(String type, Long id, String object) {
+        var json = Json.createObjectBuilder()
+                .add("type", type)
+                .add("id", id)
+                .add("entity", object)
+                .build()
+                .toString();
         for (Session s : sessions) {
             if (s.isOpen()) {
                 s.getAsyncRemote().sendText(json);

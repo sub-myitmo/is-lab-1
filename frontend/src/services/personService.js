@@ -27,19 +27,25 @@ export const personService = {
 
     checkPassportID: (passportID) => api.get(`/persons/check/${passportID}`),
 
+    getAllCounts: () => api.get(`/counts`),
+
 
     // Location operations
     getLocations: () => api.get('/locations'),
+    getAllLocations: (page = 0, size = 10, sortField='id', sortDirection='asc') =>
+        api.get(`/locations/pagination?page=${page}&size=${size}&field=${sortField}&direction=${sortDirection}`),
     getLocationById: (id) => api.get(`/locations/${id}`),
     createLocation: (location) => api.post('/locations', location),
-    // updateLocation: (id, location) => api.put(`/locations/${id}`, location),
+    updateLocation: (id, location) => api.put(`/locations/${id}`, location),
     deleteLocation: (id) => api.delete(`/locations/${id}`),
 
     // Coordinates operations
     getCoordinates: () => api.get('/coordinates'),
+    getAllCoordinates: (page = 0, size = 10, sortField='id', sortDirection='asc') =>
+        api.get(`/coordinates/pagination?page=${page}&size=${size}&field=${sortField}&direction=${sortDirection}`),
     getCoordinatesById: (id) => api.get(`/coordinates/${id}`),
     createCoordinates: (coordinates) => api.post('/coordinates', coordinates),
-    // updateCoordinates: (id, coordinates) => api.put(`/coordinates/${id}`, coordinates),
+    updateCoordinates: (id, coordinates) => api.put(`/coordinates/${id}`, coordinates),
     deleteCoordinates: (id) => api.delete(`/coordinates/${id}`),
 };
 

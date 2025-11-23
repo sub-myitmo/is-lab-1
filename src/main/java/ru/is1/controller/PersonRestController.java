@@ -5,16 +5,14 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-import ru.is1.controller.dto.person.CountResponse;
+import ru.is1.config.ws.Broadcaster;
+import ru.is1.controller.dto.CountResponse;
 import ru.is1.controller.dto.error.ErrorResponse;
 import ru.is1.controller.dto.person.PersonRequest;
 import ru.is1.controller.dto.person.PersonResponse;
-import ru.is1.controller.dto.person.PersonsResponse;
-import ru.is1.dal.entity.Color;
-import ru.is1.dal.entity.Country;
+import ru.is1.controller.dto.person.PersonsWrapper;
 import ru.is1.dal.entity.Person;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -27,6 +25,9 @@ import ru.is1.domain.service.PersonService;
 public class PersonRestController {
     @Inject
     private PersonService personService;
+
+    @Inject
+    private Broadcaster broadcaster;
 
     @GET
     public Response getAllPersons(
@@ -62,15 +63,15 @@ public class PersonRestController {
             if (search != null && !search.trim().isEmpty()) {
                 persons = personService.searchPersons(page * size, size, field, search, direction);
             } else {
-                persons = personService.getPersonsPaginated(page * size, size, field, direction);
+                persons = personService.getEntitiesPaginated(page * size, size, field, direction);
             }
 
-            long totalCount = personService.getTotalPersonCount();
+            long totalCount = personService.getTotalEntitiesCount();
 
             List<PersonResponse> personsList = persons.stream()
                     .map(PersonResponse::fromEntity)
                     .toList();
-            PersonsResponse response = new PersonsResponse(personsList, totalCount, page, size);
+            PersonsWrapper response = new PersonsWrapper(personsList, totalCount, page, size);
             return Response.ok(response).build();
 
         } catch (Exception e) {
@@ -84,7 +85,7 @@ public class PersonRestController {
     @Path("/{id}")
     public Response getPersonById(@PathParam("id") Long id) {
         try {
-            Optional<Person> person = personService.getPersonById(id);
+            Optional<Person> person = personService.getEntityById(id);
             if (person.isPresent()) {
                 return Response.ok(PersonResponse.fromEntity(person.get())).build();
             } else {
@@ -106,7 +107,9 @@ public class PersonRestController {
         try {
             Person person = PersonRequest.toEntity(request);
             person.setId(id);
-            personService.updatePerson(person, locationId, coordinatesId);
+            personService.checkLocationAndCoordinates(person, locationId, coordinatesId);
+            Person newPerson = personService.updateEntity(person);
+            broadcaster.broadcast("UPDATE", newPerson.getId(), "Person");
             return Response.ok().build();
         } catch (IllegalArgumentException e) {
             return Response.status(Response.Status.BAD_REQUEST)
@@ -123,8 +126,9 @@ public class PersonRestController {
     @Path("/{id}")
     public Response deletePerson(@PathParam("id") Long id) {
         try {
-            boolean deleted = personService.deletePerson(id);
+            boolean deleted = personService.deleteEntity(id);
             if (deleted) {
+                broadcaster.broadcast("DELETE", id, "Person");
                 return Response.noContent().build();
             } else {
                 return Response.status(Response.Status.NOT_FOUND)
@@ -146,7 +150,9 @@ public class PersonRestController {
             Person person) {
 
         try {
-            Person created = personService.createPerson(person, locationId, coordinatesId);
+            personService.checkLocationAndCoordinates(person, locationId, coordinatesId);
+            Person created = personService.createEntity(person);
+            broadcaster.broadcast("CREATE", created.getId(), "Person");
             return Response.status(Response.Status.CREATED).entity(PersonResponse.fromEntity(created)).build();
         } catch (IllegalArgumentException e) {
             return Response.status(Response.Status.BAD_REQUEST)

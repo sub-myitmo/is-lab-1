@@ -2,6 +2,7 @@ package ru.is1.domain.service;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import ru.is1.dal.dao.PersonDAO;
 import ru.is1.dal.entity.*;
 
@@ -10,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 @ApplicationScoped
-public class PersonService {
+public class PersonService implements BaseService<Person> {
 
     @Inject
     private PersonDAO personDAO;
@@ -22,64 +23,99 @@ public class PersonService {
     private CoordinatesService coordinatesService;
 
 
-    public Optional<Person> getPersonById(Long id) {
+    @Override
+    @Transactional
+    public Optional<Person> getEntityById(Long id) {
         return personDAO.findById(id);
     }
 
-    public Person createPerson(Person person, Long locationId, Long coordinatesId) {
-        checkLocationAndCoordinates(person, locationId, coordinatesId);
-        person.setCreationDate(LocalDateTime.now());
-
-        return personDAO.save(person);
+    @Override
+    @Transactional
+    public boolean deleteEntity(Long id) {
+        return personDAO.delete(id);
     }
 
-
-    public void updatePerson(Person person, Long locationId, Long coordinatesId) {
+    @Override
+    @Transactional
+    public Person updateEntity(Person person) {
         if (person.getId() == null) {
             throw new IllegalArgumentException("Person ID cannot be null for update");
         }
 
-        checkLocationAndCoordinates(person, locationId, coordinatesId);
-
-        Optional<Person> personOptional = getPersonById(person.getId());
+        Optional<Person> personOptional = getEntityById(person.getId());
         if (personOptional.isPresent()) {
             person.setCreationDate(personOptional.get().getCreationDate());
-            personDAO.update(person);
+            return personDAO.update(person);
         } else {
             throw new IllegalArgumentException("Person not found with id: " + person.getId());
         }
     }
 
-    private void checkLocationAndCoordinates(Person person, Long locationId, Long coordinatesId) {
+    @Override
+    @Transactional
+    public long getTotalEntitiesCount() {
+        return personDAO.getTotalCount();
+    }
+
+    @Override
+    @Transactional
+    public Person createEntity(Person person) {
+        person.setCreationDate(LocalDateTime.now());
+        return personDAO.update(person);
+    }
+
+    @Override
+    @Transactional
+    public List<Person> getEntitiesPaginated(int first, int size, String field, String direction) {
+        return personDAO.findWithPagination(first, size, field, direction);
+    }
+
+
+    @Transactional
+    public void checkLocationAndCoordinates(Person person, Long locationId, Long coordinatesId) {
         if (locationId != null) {
-            Location location = locationService.getLocationById(locationId).orElseThrow(() -> new IllegalArgumentException("Location not found"));
+            Location location = locationService.getEntityById(locationId).orElseThrow(() -> new IllegalArgumentException("Location not found"));
             person.setLocation(location);
         }
         if (coordinatesId != null) {
-            Coordinates coordinates = coordinatesService.getCoordinatesById(coordinatesId).orElseThrow(() -> new IllegalArgumentException("Coordinates not found"));
+            Coordinates coordinates = coordinatesService.getEntityById(coordinatesId).orElseThrow(() -> new IllegalArgumentException("Coordinates not found"));
             person.setCoordinates(coordinates);
         }
     }
 
-
-    public boolean deletePerson(Long id) {
-        return personDAO.deletePersonAndAllTransitivelyRelated(id);
-    }
-
-    public List<Person> getPersonsPaginated(int first, int size, String field, String direction) {
-        return personDAO.findWithPagination(first, size, field, direction);
-    }
-
-    public long getTotalPersonCount() {
-        return personDAO.getTotalCount();
-    }
-
+    @Transactional
     public Optional<Long> findByPassportID(String passportID) {
         return personDAO.findByPassportID(passportID);
     }
 
+    @Transactional
     public List<Person> searchPersons(int first, int pageSize, String field, String namePattern, String direction) {
         return personDAO.search(first, pageSize, field, namePattern, direction);
     }
 
+    // special
+    @Transactional
+    public Optional<Person> findPersonWithMinPassportID() {
+        return personDAO.findMinPassportID();
+    }
+
+    @Transactional
+    public long countPersonsWithNationalityLessThan(Country nationality) {
+        return personDAO.countByNationalityLessThan(nationality);
+    }
+
+    @Transactional
+    public long countPersonsWithNationalityGreaterThan(Country nationality) {
+        return personDAO.countByNationalityGreaterThan(nationality);
+    }
+
+    @Transactional
+    public long countPersonsWithHairColor(Color hairColor) {
+        return personDAO.countByHairColor(hairColor);
+    }
+
+    @Transactional
+    public long countPersonsWithEyeColor(Color eyeColor) {
+        return personDAO.countByEyeColor(eyeColor);
+    }
 }

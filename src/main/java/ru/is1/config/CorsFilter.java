@@ -22,7 +22,7 @@ public class CorsFilter implements ContainerRequestFilter, ContainerResponseFilt
                             .header("Access-Control-Allow-Origin", "*")
                             .header("Access-Control-Allow-Credentials", "true")
                             .header("Access-Control-Allow-Headers", "origin, content-type, accept, authorization")
-                            .header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, HEAD, PATCH")
+                            .header("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS, HEAD, PUT")
                             .build()
             );
         }
@@ -34,6 +34,6 @@ public class CorsFilter implements ContainerRequestFilter, ContainerResponseFilt
         responseContext.getHeaders().add("Access-Control-Allow-Origin", "*");
         responseContext.getHeaders().add("Access-Control-Allow-Credentials", "true");
         responseContext.getHeaders().add("Access-Control-Allow-Headers", "origin, content-type, accept, authorization");
-        responseContext.getHeaders().add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, HEAD, PATCH");
+        responseContext.getHeaders().add("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS, HEAD, PUT");
     }
 }

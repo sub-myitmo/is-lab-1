@@ -18,8 +18,22 @@ export const WS_URL = 'ws://127.0.0.1:20568/person-management/websocket';
 // export const API_BASE_URL = '/api';
 // export const WS_URL = '/ws';
 
+export const LOCATION_FIELDS = [
+    { key: 'id', label: 'ID', sortable: true},
+    { key: 'x', label: 'X', sortable: true},
+    { key: 'y', label: 'Y', sortable: true},
+    { key: 'z', label: 'Z', sortable: true},
+    { key: 'actions', label: 'Actions', sortable: false }
+]
 
-export const FIELDS = [
+export const COORDINATES_FIELDS = [
+    { key: 'id', label: 'ID', sortable: true},
+    { key: 'x', label: 'X', sortable: true},
+    { key: 'y', label: 'Y', sortable: true},
+    { key: 'actions', label: 'Actions', sortable: false }
+]
+
+export const PERSON_FIELDS = [
     { key: 'id', label: 'ID', sortable: true},
     { key: 'name', label: 'Name', sortable: true, filterable: true },
     { key: 'passportID', label: 'Passport ID', sortable: true, filterable: true },

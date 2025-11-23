@@ -46,11 +46,19 @@
             </basic>
 
             <many-to-one name="coordinates" target-entity="ru.is1.dal.entity.Coordinates" fetch="EAGER">
-                <join-column name="coordinates_id" nullable="false"/>
+                <join-column name="coordinates_id"/>
+                <cascade>
+                    <cascade-merge/>  <!-- Добавьте каскадный merge -->
+                    <cascade-remove/>
+                </cascade>
             </many-to-one>
 
             <many-to-one name="location" target-entity="ru.is1.dal.entity.Location" fetch="EAGER">
-                <join-column name="location_id" nullable="false"/>
+                <join-column name="location_id"/>
+                <cascade>
+                    <cascade-merge/>  <!-- Добавьте каскадный merge -->
+                    <cascade-remove/>
+                </cascade>
             </many-to-one>
         </attributes>
     </entity>

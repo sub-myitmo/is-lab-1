@@ -1,10 +1,9 @@
 import React, { useState, useMemo } from 'react';
-import { formatDate, getDisplayName } from '../../utils/helpers';
-import {PERSON_FIELDS} from '../../utils/constants';
+import {COORDINATES_FIELDS} from '../../utils/constants';
 import '../styles/PersonTable.css';
 
-const PersonTable = ({
-                         persons,
+const CoordinatesTable = ({
+                         coordinatesArr,
                          onEdit,
                          onDelete,
                          onView,
@@ -12,7 +11,7 @@ const PersonTable = ({
                          sortField,
                          sortDirection
                      }) => {
-    const [selectedPerson, setSelectedPerson] = useState(null);
+    const [selectedCoordinates, setSelectedCoordinates] = useState(null);
 
     const handleSort = (field) => {
         if (onSort) {
@@ -25,10 +24,10 @@ const PersonTable = ({
         return sortDirection === 'asc' ? '↑' : '↓';
     };
 
-    if (!persons || persons.length === 0) {
+    if (!coordinatesArr || coordinatesArr.length === 0) {
         return (
             <div className="no-data">
-                <p>No persons found</p>
+                <p>No coordinates found</p>
             </div>
         );
     }
@@ -38,7 +37,7 @@ const PersonTable = ({
             <table className="person-table">
                 <thead>
                 <tr>
-                    {PERSON_FIELDS.map(column => (
+                    {COORDINATES_FIELDS.map(column => (
                         <th key={column.key}>
                             {column.sortable ? (
                                 <button
@@ -55,36 +54,28 @@ const PersonTable = ({
                 </tr>
                 </thead>
                 <tbody>
-                {persons.map(person => (
-                    <tr key={person.id} className={selectedPerson === person.id ? 'selected' : ''}>
-                        <td>{person.id}</td>
-                        <td>{person.name}</td>
-                        <td>{person.passportID}</td>
-                        <td>{getDisplayName(person.nationality)}</td>
-                        <td>{getDisplayName(person.eyeColor)}</td>
-                        <td>{getDisplayName(person.hairColor)}</td>
-                        <td>{person.height} cm</td>
-                        <td>{person.weight} kg</td>
-                        <td>{formatDate(person.creationDate)}</td>
-                        <td>({person.location.x}, {person.location.y}, {person.location.z})</td>
-                        <td>({person.coordinates.x}, {person.coordinates.y})</td>
+                {coordinatesArr.map(coordinates => (
+                    <tr key={coordinates.id} className={selectedCoordinates === coordinates.id ? 'selected' : ''}>
+                        <td>{coordinates.id}</td>
+                        <td>{coordinates.x}</td>
+                        <td>{coordinates.y}</td>
                         <td className="actions">
                             <button
-                                onClick={() => onView(person)}
+                                onClick={() => onView(coordinates)}
                                 className="btn-view"
                                 title="View details"
                             >
                                 👁️
                             </button>
                             <button
-                                onClick={() => onEdit(person)}
+                                onClick={() => onEdit(coordinates)}
                                 className="btn-edit"
                                 title="Edit"
                             >
                                 ✏️
                             </button>
                             <button
-                                onClick={() => onDelete(person)}
+                                onClick={() => onDelete(coordinates)}
                                 className="btn-delete"
                                 title="Delete"
                             >
@@ -99,4 +90,4 @@ const PersonTable = ({
     );
 };
 
-export default PersonTable;
+export default CoordinatesTable;

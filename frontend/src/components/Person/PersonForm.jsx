@@ -4,8 +4,6 @@ import {
     validatePerson,
     validateLocation,
     validateCoordinates,
-    parseCoordinatesData,
-    parseLocationData
 } from '../../utils/helpers';
 import personService from '../../services/personService';
 import '../styles/PersonForm.css';

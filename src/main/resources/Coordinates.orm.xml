@@ -20,9 +20,10 @@
                 <column name="y"/>
             </basic>
 
-            <one-to-many name="persons" mapped-by="coordinates" orphan-removal="true">
+            <one-to-many name="persons" mapped-by="coordinates">
                 <cascade>
-                    <cascade-all/>
+                    <cascade-persist/>
+                    <cascade-remove/>
                 </cascade>
             </one-to-many>
         </attributes>

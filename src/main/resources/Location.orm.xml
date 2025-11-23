@@ -23,9 +23,10 @@
                 <column name="z"/>
             </basic>
 
-            <one-to-many name="persons" mapped-by="location" orphan-removal="true">
+            <one-to-many name="persons" mapped-by="location">
                 <cascade>
-                    <cascade-all/>
+                    <cascade-persist/>
+                    <cascade-remove/>
                 </cascade>
             </one-to-many>
         </attributes>

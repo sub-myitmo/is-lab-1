@@ -1,112 +1,46 @@
 import React, {useState, useEffect, useCallback, useRef} from 'react';
 import {Routes, Route, Link} from 'react-router-dom';
-import PersonTable from './components/Person/PersonTable';
-import PersonForm from './components/Person/PersonForm';
-import PersonView from './components/Person/PersonView';
 import SpecialOperationsPanel from './components/SpecialOperations/SpecialOperationsPanel';
-import Pagination from './components/common/Pagination';
-import SearchBar from './components/common/SearchBar';
-import LoadingSpinner from './components/common/LoadingSpinner';
 import {useWebSocket} from "./hooks/useWebSocket.js";
-import personService from './services/personService';
 import './App.css';
 import {WS_URL} from "./utils/constants.js";
+import PersonPage from "./components/Person/PersonPage.jsx";
+import LocationPage from "./components/Location/LocationPage.jsx";
+import CoordinatesPage from "./components/Coordinates/CoordinatesPage.jsx";
+import personService from "./services/personService.js";
 
 function App() {
-    const [persons, setPersons] = useState([]);
+    const [personRefreshTrigger, setPersonRefreshTrigger] = useState(0);
+    const [personUpdateData, setPersonUpdateData] = useState(null);
+
+    const [locationRefreshTrigger, setLocationRefreshTrigger] = useState(0);
+    const [locationUpdateData, setLocationUpdateData] = useState(null);
+
+    const [coordinatesRefreshTrigger, setCoordinatesRefreshTrigger] = useState(0);
+    const [coordinatesUpdateData, setCoordinatesUpdateData] = useState(null);
+
     const [loading, setLoading] = useState(false);
-    const [currentPage, setCurrentPage] = useState(0);
-    const [pageSize, setPageSize] = useState(10);
-    const [totalItems, setTotalItems] = useState(0);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [searchField, setSearchField] = useState('name');
-    const [sortField, setSortField] = useState('id');
-    const [sortDirection, setSortDirection] = useState('asc');
-
-    const [showPersonForm, setShowPersonForm] = useState(false);
-    const [showPersonView, setShowPersonView] = useState(false);
-    const [selectedPerson, setSelectedPerson] = useState(null);
-    const [editingPerson, setEditingPerson] = useState(null);
+    const [totalItems, setTotalItems] = useState([]);
 
 
-    // Загрузка данных
-    const loadPersons = useCallback(async () => {
+    const loadCounts = useCallback(async () => {
         setLoading(true);
         try {
-            const response = await personService.getAll(
-                currentPage,
-                pageSize,
-                searchTerm,
-                searchTerm === '' ? sortField : searchField,
-                sortDirection
-            );
+            const response = await personService.getAllCounts();
 
-            const personsData = response.data.persons || [];
-            setPersons(personsData);
-            setTotalItems(response.data.totalCount || 0);
-
-
+            const itemsData = response.data || [];
+            setTotalItems(itemsData);
         } catch (error) {
-            console.error('Error loading persons:', error);
-            // alert('Error loading persons: ' + error.message);
+            console.error('Error loading counts:', error);
         } finally {
             setLoading(false);
         }
-    }, [currentPage, pageSize, searchTerm, searchField, sortField, sortDirection]);
+    }, []);
 
     // Загрузка при изменении параметров
     useEffect(() => {
-        loadPersons();
-    }, [loadPersons]);
-
-
-
-    const handlePersonCreated = useCallback(async (personId) => {
-        console.log('Person created: id=', personId);
-
-        // всегда перезагружаем - может надо добавить новую страницу внизу / новый Person станет подходить под фильтры
-        await loadPersons();
-    }, [loadPersons]);
-
-    const handlePersonUpdated = useCallback(async (personId) => {
-        console.log('Person updated: id=', personId);
-
-        // нет смысла точечно обновлять, поскольку Person может перестать подходить по фильтрам
-        await loadPersons();
-        // Если мы редактируем эту персону, закрываем форму
-        if (editingPerson && editingPerson.id === personId) {
-            console.log('🚫 Closing edit form - person was updated');
-            setShowPersonForm(false);
-            setEditingPerson(null);
-        }
-
-        // Если мы просматриваем эту персону, обновляем данные
-        if (selectedPerson && selectedPerson.id === personId) {
-            console.log('🔄 Refreshing person view');
-            try {
-                const response = await personService.getById(personId);
-                setSelectedPerson(response.data);
-            } catch (error) {
-                console.error('Error refreshing person view:', error);
-            }
-        }
-    }, [loadPersons]);
-
-    const handlePersonDeleted = useCallback(async (personId) => {
-        console.log('Person deleted: id=', personId);
-
-        // после удаления может понадобиться обновить количество элементов
-        await loadPersons();
-        // Закрываем формы если удалена редактируемая/просматриваемая персона
-        if ((editingPerson && editingPerson.id === personId) ||
-            (selectedPerson && selectedPerson.id === personId)) {
-            console.log('🚫 Closing modals - person was deleted');
-            setShowPersonForm(false);
-            setShowPersonView(false);
-            setEditingPerson(null);
-            setSelectedPerson(null);
-        }
-    }, [loadPersons]);
+        loadCounts();
+    }, [loadCounts]);
 
     // Обработка WebSocket сообщений
     const handleWebSocketMessage = useCallback((message) => {
@@ -114,95 +48,70 @@ function App() {
 
         const msg = JSON.parse(message);
         const action = msg.type;
-        const personIdStr = msg.id;
+        const entityIdStr = msg.id;
         const entity = msg.entity;
-        const personId = parseInt(personIdStr);
+        const entityId = parseInt(entityIdStr);
 
-        console.log('Action:', action, entity, 'ID:', personId);
+        console.log('Action:', action, entity, 'ID:', entityId);
+        loadCounts();
 
-        if (entity === "Person") {
-            switch (action) {
-                case 'CREATED':
-                    console.log('Calling handlePersonCreated');
-                    handlePersonCreated(personId);
-                    break;
+        switch (action) {
+            case 'CREATED':
+                switch (entity) {
+                    case 'Person':
+                        setPersonRefreshTrigger(prev => prev + 1);
+                        break;
+                    case 'Location':
+                        setLocationRefreshTrigger(prev => prev + 1);
+                        break;
+                    case 'Coordinates':
+                        setCoordinatesRefreshTrigger(prev => prev + 1);
+                        break;
+                }
+                break;
 
-                case 'UPDATED':
-                    console.log('Calling handlePersonUpdated');
-                    handlePersonUpdated(personId);
-                    break;
+            case 'UPDATED':
+                switch (entity) {
+                    case 'Person':
+                        setPersonRefreshTrigger(prev => prev + 1);
+                        setPersonUpdateData({entityId, action: 'UPDATED', data: {entityId, action}});
+                        break;
+                    case 'Location':
+                        setLocationRefreshTrigger(prev => prev + 1);
+                        setLocationUpdateData({entityId, action: 'UPDATED', data: {entityId, action}});
+                        break;
+                    case 'Coordinates':
+                        setCoordinatesRefreshTrigger(prev => prev + 1);
+                        setCoordinatesUpdateData({entityId, action: 'UPDATED', data: {entityId, action}});
+                        break;
+                }
+                break;
 
-                case 'DELETED':
-                    console.log('Calling handlePersonDeleted');
-                    handlePersonDeleted(personId);
-                    break;
+            case 'DELETED':
+                switch (entity) {
+                    case 'Person':
+                        setPersonUpdateData({entityId, action: 'DELETED'});
+                        setPersonRefreshTrigger(prev => prev + 1);
+                        break;
+                    case 'Location':
+                        setLocationUpdateData({entityId, action: 'DELETED'});
+                        setLocationRefreshTrigger(prev => prev + 1);
+                        break;
+                    case 'Coordinates':
+                        setCoordinatesUpdateData({entityId, action: 'DELETED'});
+                        setCoordinatesRefreshTrigger(prev => prev + 1);
+                        break;
+                }
+                break;
 
-                default:
-                    console.log('❓ Unknown action:', action);
-            }
+            default:
+                console.log('❓ Unknown action:', action);
         }
-    }, [handlePersonCreated, handlePersonUpdated, handlePersonDeleted]);
+    }, [loadCounts]);
 
 
     // WebSocket
-    const { isConnected } = useWebSocket(WS_URL, handleWebSocketMessage);
-
-
-    const handleSearch = (term, field) => {
-        setSearchTerm(term);
-        setSearchField(field);
-        console.log(term === '');
-        if (term !== '') setCurrentPage(0);
-    };
-
-    const handleSort = (field) => {
-        const newSortDirection = sortField === field
-            ? (sortDirection === 'asc' ? 'desc' : 'asc')
-            : 'asc';
-
-        setSortField(field);
-        setSortDirection(newSortDirection);
-        setCurrentPage(0);
-    };
-
-    const handleCreatePerson = () => {
-        setEditingPerson(null);
-        setShowPersonForm(true);
-    };
-
-    const handleEditPerson = (person) => {
-        setEditingPerson(person);
-        setShowPersonForm(true);
-    };
-
-    const handleViewPerson = (person) => {
-        setSelectedPerson(person);
-        setShowPersonView(true);
-    };
-
-    const handleDeletePerson = async (person) => {
-        if (window.confirm(`Are you sure you want to delete ${person.name}?`)) {
-            try {
-                await personService.delete(person.id);
-                await loadPersons();
-                // alert('Person deleted successfully');
-            } catch (error) {
-                // alert('Error deleting person: ' + error.message);
-            }
-        }
-    };
-
-    const handleSavePerson = async (savedPerson) => {
-        setShowPersonForm(false);
-        setEditingPerson(null);
-        await loadPersons();
-        console.log(`Person ${savedPerson.id ? 'created' : 'updated'} successfully`);
-    };
-
-    const handleCancelForm = () => {
-        setShowPersonForm(false);
-        setEditingPerson(null);
-    };
+    const {isConnected} = useWebSocket(WS_URL, handleWebSocketMessage);
 
     return (
         <div className="app">
@@ -212,6 +121,8 @@ function App() {
                     <ul className="nav-menu">
                         <li><Link to="/">Dashboard</Link></li>
                         <li><Link to="/persons">All Persons</Link></li>
+                        <li><Link to="/coordinates">All Coordinates</Link></li>
+                        <li><Link to="/locations">All Locations</Link></li>
                         <li><Link to="/special-operations">Special Operations</Link></li>
                     </ul>
                 </div>
@@ -221,20 +132,8 @@ function App() {
                 <Routes>
                     <Route path="/" element={
                         <div className="dashboard">
-                            <h2>Dashboard</h2>
+                            <h1>Dashboard</h1>
                             <div className="stats-grid">
-                                <div className="stat-card">
-                                    <h3>Total Persons</h3>
-                                    <p>{totalItems}</p>
-                                </div>
-                                <div className="stat-card">
-                                    <h3>Current Page</h3>
-                                    <p>{currentPage + 1}</p>
-                                </div>
-                                <div className="stat-card">
-                                    <h3>Page Size</h3>
-                                    <p>{pageSize}</p>
-                                </div>
                                 <div className="stat-card">
                                     <h3>WebSocket</h3>
                                     <p className={isConnected ? 'status-connected' : 'status-disconnected'}>
@@ -242,82 +141,52 @@ function App() {
                                     </p>
                                 </div>
                             </div>
+                            <div className="stats-grid">
+                                <div className="stat-card">
+                                    <h3>Total Persons</h3>
+                                    <p>{totalItems.persons_count}</p>
+                                </div>
+                                <div className="stat-card">
+                                    <h3>Total Coordinates</h3>
+                                    <p>{totalItems.coordinates_count}</p>
+                                </div>
+                                <div className="stat-card">
+                                    <h3>Total Locations</h3>
+                                    <p>{totalItems.locations_count}</p>
+                                </div>
+                            </div>
                         </div>
                     }/>
 
                     <Route path="/persons" element={
-                        <div className="persons-page">
-                            <div className="page-header">
-                                <h2>Person Management</h2>
-                                <div className={`ws-badge ${isConnected ? 'connected' : 'disconnected'}`}>
-                                    {isConnected ? '🟢 Live Updates' : '🔴 Offline'}
-                                </div>
-                                <button onClick={handleCreatePerson} className="btn-primary">
-                                    Add New Person
-                                </button>
-                            </div>
+                        <PersonPage
+                            refreshTrigger={personRefreshTrigger}
+                            personUpdateData={personUpdateData}
+                            onPersonUpdateProcessed={() => setPersonUpdateData(null)}
+                        />
+                    }/>
 
-                            <div className="controls">
-                                <SearchBar
-                                    onSearch={handleSearch}
-                                    term={searchTerm}
-                                    field={searchField}
-                                />
-                            </div>
 
-                            {loading ? (
-                                <LoadingSpinner text="Loading persons..."/>
-                            ) : (
-                                <>
-                                    <PersonTable
-                                        persons={persons}
-                                        onEdit={handleEditPerson}
-                                        onDelete={handleDeletePerson}
-                                        onView={handleViewPerson}
-                                        onSort={handleSort}
-                                        sortField={sortField}
-                                        sortDirection={sortDirection}
-                                    />
+                    <Route path="/coordinates" element={
+                        <CoordinatesPage
+                            refreshTrigger={coordinatesRefreshTrigger}
+                            coordinatesUpdateData={coordinatesUpdateData}
+                            onCoordinatesUpdateProcessed={() => setCoordinatesUpdateData(null)}
+                        />
+                    }/>
 
-                                    <Pagination
-                                        currentPage={currentPage}
-                                        totalPages={persons.length === pageSize ? Math.ceil(totalItems / pageSize) : Math.ceil(persons.length / pageSize)}
-                                        onPageChange={setCurrentPage}
-                                        pageSize={pageSize}
-                                        onPageSizeChange={setPageSize}
-                                        totalItems={totalItems}
-                                    />
-                                </>
-                            )}
-                        </div>
+                    <Route path="/locations" element={
+                        <LocationPage
+                            refreshTrigger={locationRefreshTrigger}
+                            locationUpdateData={locationUpdateData}
+                            onLocationUpdateProcessed={() => setLocationUpdateData(null)}
+                        />
                     }/>
 
                     <Route path="/special-operations" element={
                         <SpecialOperationsPanel/>
                     }/>
                 </Routes>
-
-                {/* Modals */}
-                {showPersonForm && (
-                    <div className="modal-overlay">
-                        <div className="modal">
-                            <PersonForm
-                                person={editingPerson}
-                                onSave={handleSavePerson}
-                                onCancel={handleCancelForm}
-                                isEditing={!!editingPerson}
-                            />
-                        </div>
-                    </div>
-                )}
-
-                {showPersonView && (
-                    <PersonView
-                        person={selectedPerson}
-                        onClose={() => setShowPersonView(false)}
-                        onEdit={handleEditPerson}
-                    />
-                )}
             </main>
         </div>
     );

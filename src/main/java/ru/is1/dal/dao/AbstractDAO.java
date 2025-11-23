@@ -1,22 +1,15 @@
 package ru.is1.dal.dao;
 
-import jakarta.enterprise.event.Event;
 import jakarta.inject.Inject;
 
-import jakarta.transaction.Transactional;
 import org.hibernate.Session;
 import ru.is1.config.utils.HibernateSessionFactory;
-import ru.is1.config.ws.DbEvent;
 import ru.is1.dal.Identifiable;
 
-import java.util.Optional;
+import java.util.*;
 
 public abstract class AbstractDAO<T extends Identifiable> {
     private final Class<T> entityClass;
-
-    @Inject
-    Event<DbEvent> events;
-
     @Inject
     protected HibernateSessionFactory factory;
 
@@ -24,55 +17,72 @@ public abstract class AbstractDAO<T extends Identifiable> {
         this.entityClass = entityClass;
     }
 
-    @Transactional
     public T save(T entity) {
         Session session = factory.getCurrentSession();
         if (entity.getId() == null) {
             session.persist(entity);
             System.out.println("Saving: " + entity);
-            session.flush();
-            events.fire(new DbEvent("CREATED", entity.getId(), entity.getClass().getSimpleName()));
+//            session.flush();
         }
         return entity;
     }
 
-    @Transactional
     public T update(T entity) {
         Session session = factory.getCurrentSession();
         T managed = session.merge(entity);
         System.out.println("Updating: " + entity);
-        session.flush();
-        events.fire(new DbEvent("UPDATED", entity.getId(), entity.getClass().getSimpleName()));
+//        session.flush();
         return managed;
     }
 
 
-    @Transactional
     public Optional<T> findById(Long id) {
         Session session = factory.getCurrentSession();
         T entity = session.get(entityClass, id);
-//        if (entity != null) {
-//            initializeLazyFields(entity);
-//        }
         return Optional.ofNullable(entity);
     }
 
-    @Transactional
+    public List<T> findWithPagination(int first, int pageSize, String field, String direction) {
+        Session session = factory.getCurrentSession();
+        var cb = session.getCriteriaBuilder();
+        var query = cb.createQuery(entityClass);
+        var root = query.from(entityClass);
+
+        query.select(root);
+
+        // Добавляем сортировку
+        if ("ASC".equalsIgnoreCase(direction)) {
+            query.orderBy(cb.asc(root.get(field)));
+        } else {
+            query.orderBy(cb.desc(root.get(field)));
+        }
+
+        return session.createQuery(query)
+                .setFirstResult(first)
+                .setMaxResults(pageSize)
+                .list();
+    }
+
     public boolean delete(Long id) {
         Session session = factory.getCurrentSession();
         T entity = session.get(entityClass, id);
 
-        if (entity != null && canDelete(id, entity)) {
+        if (entity != null) {
             session.remove(entity);
             System.out.println("Removing: " + entity);
-            session.flush();
-            events.fire(new DbEvent("DELETED", id, entity.getClass().getSimpleName()));
             return true;
         }
         return false;
     }
 
-    protected abstract boolean canDelete(Long id, T entity);
+    public long getTotalCount() {
+        Session session = factory.getCurrentSession();
+        var cb = session.getCriteriaBuilder();
+        var query = cb.createQuery(Long.class);
+        var root = query.from(entityClass);
 
-//    protected abstract void initializeLazyFields(T entity);
+        query.select(cb.count(root));
+        return session.createQuery(query).uniqueResult();
+
+    }
 }
