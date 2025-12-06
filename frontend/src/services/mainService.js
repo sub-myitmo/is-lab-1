@@ -1,6 +1,6 @@
 import api from './api';
 
-export const personService = {
+export const mainService = {
     // Basic CRUD operations
     getAll: (page = 0, size = 10, search = '', sortField='id', sortDirection='asc') =>
         api.get(`/persons?page=${page}&size=${size}&search=${search}&field=${sortField}&direction=${sortDirection}`),
@@ -59,4 +59,4 @@ export const personService = {
         api.get(`/import/pagination?page=${page}&size=${size}&field=${sortField}&direction=${sortDirection}`),
 };
 
-export default personService;
+export default mainService;

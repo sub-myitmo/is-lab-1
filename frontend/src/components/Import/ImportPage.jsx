@@ -1,6 +1,6 @@
 import ImportTable from "./ImportTable.jsx";
 import React, {useCallback, useEffect, useState, useRef} from "react";
-import personService from "../../services/personService.js";
+import personService from "../../services/mainService.js";
 import LoadingSpinner from "../common/LoadingSpinner.jsx";
 import Pagination from "../common/Pagination.jsx";
 import ImportView from "./ImportView.jsx";

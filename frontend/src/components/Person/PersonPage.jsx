@@ -1,6 +1,6 @@
 import PersonTable from "./PersonTable.jsx";
 import React, {useCallback, useEffect, useState} from "react";
-import personService from "../../services/personService.js";
+import personService from "../../services/mainService.js";
 import SearchBar from "../common/SearchBar.jsx";
 import LoadingSpinner from "../common/LoadingSpinner.jsx";
 import Pagination from "../common/Pagination.jsx";

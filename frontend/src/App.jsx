@@ -8,7 +8,7 @@ import PersonPage from "./components/Person/PersonPage.jsx";
 import LocationPage from "./components/Location/LocationPage.jsx";
 import CoordinatesPage from "./components/Coordinates/CoordinatesPage.jsx";
 import ImportPage from "./components/Import/ImportPage.jsx";
-import personService from "./services/personService.js";
+import personService from "./services/mainService.js";
 
 function App() {
     const [personRefreshTrigger, setPersonRefreshTrigger] = useState(0);
@@ -124,7 +124,7 @@ function App() {
                 break;
 
             default:
-                console.log('❓ Unknown action:', action);
+                console.log('Unknown action:', action);
         }
     }, [loadCounts]);
 

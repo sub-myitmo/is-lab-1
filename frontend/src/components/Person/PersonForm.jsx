@@ -5,7 +5,7 @@ import {
     validateLocation,
     validateCoordinates,
 } from '../../utils/helpers';
-import personService from '../../services/personService';
+import personService from '../../services/mainService';
 import '../styles/PersonForm.css';
 
 const PersonForm = ({person, onSave, onCancel, isEditing = false}) => {

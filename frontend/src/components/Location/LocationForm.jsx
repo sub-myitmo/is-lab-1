@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import {Color, Country} from '../../utils/constants';
 import {validateLocation} from '../../utils/helpers';
-import personService from '../../services/personService';
+import personService from '../../services/mainService';
 import '../styles/PersonForm.css';
 
 const LocationForm = ({location, onSave, onCancel, isEditing = false}) => {
