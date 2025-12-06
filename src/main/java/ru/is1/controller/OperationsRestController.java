@@ -11,7 +11,7 @@ import ru.is1.controller.dto.person.PersonResponse;
 import ru.is1.dal.entity.Color;
 import ru.is1.dal.entity.Country;
 import ru.is1.dal.entity.Person;
-import ru.is1.domain.service.PersonService;
+import ru.is1.domain.service.entity.PersonService;
 
 import java.util.Arrays;
 import java.util.Optional;

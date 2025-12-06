@@ -10,7 +10,7 @@ import ru.is1.controller.dto.coordinates.CoordinatesResponse;
 import ru.is1.controller.dto.coordinates.CoordinatesWrapper;
 import ru.is1.controller.dto.error.ErrorResponse;
 import ru.is1.dal.entity.Coordinates;
-import ru.is1.domain.service.CoordinatesService;
+import ru.is1.domain.service.entity.CoordinatesService;
 
 import java.util.List;
 import java.util.Optional;

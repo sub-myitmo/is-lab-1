@@ -55,9 +55,8 @@ const CoordinatesForm = ({coordinates, onSave, onCancel, isEditing = false}) => 
 
         setLoading(true);
         try {
-            // Подготавливаем данные для отправки
             const coordinatesData = {
-                x: parseInt(formData.x),
+                x: parseFloat(formData.x),
                 y: parseInt(formData.y)
             };
 

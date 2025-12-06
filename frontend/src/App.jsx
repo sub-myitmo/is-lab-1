@@ -1,5 +1,5 @@
-import React, {useState, useEffect, useCallback, useRef} from 'react';
-import {Routes, Route, Link} from 'react-router-dom';
+import React, {useState, useEffect, useCallback} from 'react';
+import {Routes, Route, useNavigate} from 'react-router-dom';
 import SpecialOperationsPanel from './components/SpecialOperations/SpecialOperationsPanel';
 import {useWebSocket} from "./hooks/useWebSocket.js";
 import './App.css';
@@ -7,6 +7,7 @@ import {WS_URL} from "./utils/constants.js";
 import PersonPage from "./components/Person/PersonPage.jsx";
 import LocationPage from "./components/Location/LocationPage.jsx";
 import CoordinatesPage from "./components/Coordinates/CoordinatesPage.jsx";
+import ImportPage from "./components/Import/ImportPage.jsx";
 import personService from "./services/personService.js";
 
 function App() {
@@ -19,8 +20,12 @@ function App() {
     const [coordinatesRefreshTrigger, setCoordinatesRefreshTrigger] = useState(0);
     const [coordinatesUpdateData, setCoordinatesUpdateData] = useState(null);
 
+    const [importRefreshTrigger, setImportRefreshTrigger] = useState(0);
+
     const [loading, setLoading] = useState(false);
     const [totalItems, setTotalItems] = useState([]);
+
+    const navigate = useNavigate();
 
 
     const loadCounts = useCallback(async () => {
@@ -67,6 +72,12 @@ function App() {
                     case 'Coordinates':
                         setCoordinatesRefreshTrigger(prev => prev + 1);
                         break;
+                    case 'Import':
+                        setPersonRefreshTrigger(prev => prev + 1);
+                        setLocationRefreshTrigger(prev => prev + 1);
+                        setCoordinatesRefreshTrigger(prev => prev + 1);
+                        setImportRefreshTrigger(prev => prev + 1);
+                        break;
                 }
                 break;
 
@@ -104,11 +115,18 @@ function App() {
                 }
                 break;
 
+            case 'FAILURE_CREATED':
+                switch (entity) {
+                    case 'Import':
+                        setImportRefreshTrigger(prev => prev + 1);
+                        break;
+                }
+                break;
+
             default:
                 console.log('❓ Unknown action:', action);
         }
     }, [loadCounts]);
-
 
     // WebSocket
     const {isConnected} = useWebSocket(WS_URL, handleWebSocketMessage);
@@ -117,15 +135,27 @@ function App() {
         <div className="app">
             <nav className="navbar">
                 <div className="nav-container">
-                    <h1 className="nav-title">Person Management System</h1>
-                    <ul className="nav-menu">
-                        <li><Link to="/">Dashboard</Link></li>
-                        <li><Link to="/persons">All Persons</Link></li>
-                        <li><Link to="/coordinates">All Coordinates</Link></li>
-                        <li><Link to="/locations">All Locations</Link></li>
-                        <li><Link to="/special-operations">Special Operations</Link></li>
-                    </ul>
-                </div>
+                        <h1 className="nav-title">Lab2</h1>
+                        <div className="nav-select-container">
+                            <select
+                                className="nav-select"
+                                onChange={(e) => {
+                                    if (e.target.value) {
+                                        navigate(e.target.value);
+                                    }
+                                }}
+                                defaultValue=""
+                            >
+                                <option value="" disabled hidden>Navigate to...</option>
+                                <option value="/">Dashboard</option>
+                                <option value="/persons">All Persons</option>
+                                <option value="/coordinates">All Coordinates</option>
+                                <option value="/locations">All Locations</option>
+                                <option value="/imports">History of imports</option>
+                                <option value="/special-operations">Special Operations</option>
+                            </select>
+                        </div>
+                    </div>
             </nav>
 
             <main className="main-content">
@@ -180,6 +210,12 @@ function App() {
                             refreshTrigger={locationRefreshTrigger}
                             locationUpdateData={locationUpdateData}
                             onLocationUpdateProcessed={() => setLocationUpdateData(null)}
+                        />
+                    }/>
+
+                    <Route path="/imports" element={
+                        <ImportPage
+                            refreshTrigger={importRefreshTrigger}
                         />
                     }/>
 

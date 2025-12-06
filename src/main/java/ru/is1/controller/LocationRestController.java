@@ -10,7 +10,7 @@ import ru.is1.controller.dto.location.LocationRequest;
 import ru.is1.controller.dto.location.LocationResponse;
 import ru.is1.controller.dto.location.LocationsWrapper;
 import ru.is1.dal.entity.Location;
-import ru.is1.domain.service.LocationService;
+import ru.is1.domain.service.entity.LocationService;
 
 import java.util.List;
 import java.util.Optional;

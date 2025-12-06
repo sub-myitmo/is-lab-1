@@ -9,9 +9,9 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import ru.is1.controller.dto.CountsResponse;
 import ru.is1.controller.dto.error.ErrorResponse;
-import ru.is1.domain.service.CoordinatesService;
-import ru.is1.domain.service.LocationService;
-import ru.is1.domain.service.PersonService;
+import ru.is1.domain.service.entity.CoordinatesService;
+import ru.is1.domain.service.entity.LocationService;
+import ru.is1.domain.service.entity.PersonService;
 
 @Path("/counts")
 @Produces(MediaType.APPLICATION_JSON)

@@ -26,6 +26,15 @@ export const LOCATION_FIELDS = [
     { key: 'actions', label: 'Actions', sortable: false }
 ]
 
+export const IMPORT_FIELDS = [
+    { key: 'id', label: 'ID', sortable: true},
+    { key: 'status', label: 'Status', sortable: true},
+    { key: 'count', label: 'Count', sortable: true},
+    { key: 'errors', label: 'Errors', sortable: true},
+    { key: 'creationDate', label: 'Creation Date', sortable: true},
+    { key: 'actions', label: 'Actions', sortable: false }
+]
+
 export const COORDINATES_FIELDS = [
     { key: 'id', label: 'ID', sortable: true},
     { key: 'x', label: 'X', sortable: true},

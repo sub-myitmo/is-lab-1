@@ -1,10 +1,11 @@
-package ru.is1.domain.service;
+package ru.is1.domain.service.entity;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import ru.is1.dal.dao.PersonDAO;
 import ru.is1.dal.entity.*;
+import ru.is1.domain.service.BaseService;
 
 import java.time.LocalDateTime;
 import java.util.List;

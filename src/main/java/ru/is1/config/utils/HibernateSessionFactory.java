@@ -48,6 +48,7 @@ public class HibernateSessionFactory {
             metadataSources.addResource("Person.orm.xml");
             metadataSources.addResource("Location.orm.xml");
             metadataSources.addResource("Coordinates.orm.xml");
+            metadataSources.addResource("UserImport.orm.xml");
 
             MetadataBuilder metadataBuilder = metadataSources.getMetadataBuilder();
             Metadata metadata = metadataBuilder.build();

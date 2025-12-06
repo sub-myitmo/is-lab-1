@@ -16,8 +16,8 @@ public class Location implements Identifiable {
 
     private Integer x;
 
-    private long y;
-    private long z;
+    private Long y;
+    private Long z;
 
     private List<Person> persons = new ArrayList<>();
 
@@ -27,7 +27,7 @@ public class Location implements Identifiable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Location location = (Location) o;
-        return y == location.y && z == location.z && Objects.equals(x, location.x);
+        return Objects.equals(y, location.y) && Objects.equals(z, location.z) && Objects.equals(x, location.x);
     }
 
     @Override

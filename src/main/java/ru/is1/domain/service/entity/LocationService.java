@@ -1,10 +1,11 @@
-package ru.is1.domain.service;
+package ru.is1.domain.service.entity;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import ru.is1.dal.dao.LocationDAO;
 import ru.is1.dal.entity.Location;
+import ru.is1.domain.service.BaseService;
 
 import java.util.List;
 import java.util.Optional;
@@ -33,7 +34,9 @@ public class LocationService implements BaseService<Location> {
         if (location.getId() == null) {
             throw new IllegalArgumentException("Location ID cannot be null for update");
         }
-
+        if (locationDAO.existsAnyByLocation(List.of(location))) {
+            throw new IllegalArgumentException("Location with this fields already exists");
+        }
         return locationDAO.update(location);
     }
 

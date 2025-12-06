@@ -15,7 +15,7 @@ public class Coordinates implements Identifiable {
 
     private Float x;
 
-    private int y;
+    private Integer y;
 
     private List<Person> persons = new ArrayList<>();
 

@@ -22,7 +22,6 @@ public abstract class AbstractDAO<T extends Identifiable> {
         if (entity.getId() == null) {
             session.persist(entity);
             System.out.println("Saving: " + entity);
-//            session.flush();
         }
         return entity;
     }
@@ -31,7 +30,6 @@ public abstract class AbstractDAO<T extends Identifiable> {
         Session session = factory.getCurrentSession();
         T managed = session.merge(entity);
         System.out.println("Updating: " + entity);
-//        session.flush();
         return managed;
     }
 
@@ -83,6 +81,27 @@ public abstract class AbstractDAO<T extends Identifiable> {
 
         query.select(cb.count(root));
         return session.createQuery(query).uniqueResult();
+    }
 
+    public List<T> batchSave(List<T> entities) {
+        if (entities == null || entities.isEmpty()) {
+            return new ArrayList<>();
+        }
+        Session session = factory.getCurrentSession();
+
+        try {
+            List<T> savedEntities = new ArrayList<>();
+
+            for (T entity : entities) {
+                session.persist(entity);
+                savedEntities.add(entity);
+                System.out.println("Batch saving: " + entity);
+            }
+            return savedEntities;
+
+        } catch (Exception e) {
+            System.err.println("Batch save failed: " + e.getMessage());
+            throw new RuntimeException("Ошибка пакетного сохранения: " + e.getMessage(), e);
+        }
     }
 }

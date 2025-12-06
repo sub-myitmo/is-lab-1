@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import ru.is1.domain.service.PersonService;
+import ru.is1.domain.service.entity.PersonService;
 
 @Path("/persons")
 @Produces(MediaType.APPLICATION_JSON)

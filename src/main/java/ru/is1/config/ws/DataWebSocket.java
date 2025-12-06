@@ -1,4 +1,5 @@
 package ru.is1.config.ws;
+
 import jakarta.enterprise.inject.spi.CDI;
 import jakarta.websocket.Session;
 

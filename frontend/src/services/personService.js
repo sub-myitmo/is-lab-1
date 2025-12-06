@@ -47,6 +47,16 @@ export const personService = {
     createCoordinates: (coordinates) => api.post('/coordinates', coordinates),
     updateCoordinates: (id, coordinates) => api.put(`/coordinates/${id}`, coordinates),
     deleteCoordinates: (id) => api.delete(`/coordinates/${id}`),
+
+    importData: (formData) =>
+        api.post('/import', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        }),
+    getImports: () => api.get('/import'),
+    getAllImports: (page = 0, size = 10, sortField='id', sortDirection='asc') =>
+        api.get(`/import/pagination?page=${page}&size=${size}&field=${sortField}&direction=${sortDirection}`),
 };
 
 export default personService;
