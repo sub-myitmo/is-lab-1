@@ -1,4 +1,4 @@
-package ru.is1.domain.service;
+package ru.is1.domain.service.userimport;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -34,7 +34,7 @@ public class ImportHelpService {
     private LocationDAO locationDAO;
 
     @Transactional(rollbackOn = Exception.class)
-    public int massSave(Person[] personsData) {
+    public int importPersons(Person[] personsData) {
         int importedCount = 0;
         String errors = "";
         try {
@@ -53,13 +53,13 @@ public class ImportHelpService {
                 location.setZ(personData.getLocation().getZ());
                 locationsList.add(location);
             }
-            if (locationDAO.existsAnyByLocation(locationsList)) {
+            if (locationDAO.existsAnyByEntity(locationsList)) {
                 errors += "Один из импортируемых location уже существует! ";
             } else {
                 locationsList = locationDAO.batchSave(locationsList);
             }
 
-            if (coordinatesDAO.existsAnyByCoordinates(coordinatesList)) {
+            if (coordinatesDAO.existsAnyByEntity(coordinatesList)) {
                 errors += "Один из импортируемых coordinates уже существует! ";
             } else {
                 coordinatesList = coordinatesDAO.batchSave(coordinatesList);
@@ -89,7 +89,12 @@ public class ImportHelpService {
                 importedCount++;
             }
 
-            personDAO.batchSave(personList);
+            if (personDAO.existsAnyByEntity(personList)) {
+                errors += "Один из импортируемых person с passportID уже существует! ";
+                throw new RuntimeException(errors);
+            } else {
+                personDAO.batchSave(personList);
+            }
 
         } catch (Exception e) {
             // Извлекаем SQLException из цепочки причин

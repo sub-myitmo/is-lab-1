@@ -1,7 +1,6 @@
 package ru.is1.dal.dao;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import org.hibernate.Session;
 import ru.is1.config.aop.MonitorPerformance;
 import ru.is1.dal.entity.UserImport;
 
@@ -15,13 +14,13 @@ public class ImportDAO extends AbstractDAO<UserImport> {
         super(UserImport.class);
     }
 
-    public List<UserImport> findAll() {
-        Session session = factory.getCurrentSession();
-        var cb = session.getCriteriaBuilder();
-        var query = cb.createQuery(UserImport.class);
-        var root = query.from(UserImport.class);
+    @Override
+    public void throwIfExistsAnyByEntity(UserImport entities) {
+        return;
+    }
 
-        query.select(root);
-        return session.createQuery(query).list();
+    @Override
+    public boolean existsAnyByEntity(List<UserImport> list) {
+        return false;
     }
 }

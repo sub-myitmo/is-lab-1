@@ -1,4 +1,4 @@
-package ru.is1.domain.service;
+package ru.is1.domain.service.userimport;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -53,7 +53,7 @@ public class ImportService {
                 return importHelpService.saveImport(userImport);
             }
 
-            int importedCount = importHelpService.massSave(personsData);
+            int importedCount = importHelpService.importPersons(personsData);
 
             userImport.setCount(importedCount);
             userImport.setStatus(ImportStatus.SUCCESS.name());

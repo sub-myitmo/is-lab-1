@@ -1,11 +1,12 @@
 package ru.is1.domain.validate;
 
-
+import lombok.experimental.UtilityClass;
 import ru.is1.dal.entity.Person;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@UtilityClass
 public class PersonValidator {
     public static List<String> validatePersonsData(Person[] personsData) {
         List<String> errors = new ArrayList<>();
@@ -13,7 +14,6 @@ public class PersonValidator {
         for (int i = 0; i < personsData.length; i++) {
             Person person = personsData[i];
             try {
-                // Проверка обязательных полей
                 if (person.getName() == null || person.getName().trim().isEmpty()) {
                     errors.add("Запись " + (i + 1) + ": имя не может быть пустым");
                 }

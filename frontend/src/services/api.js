@@ -26,7 +26,10 @@ api.interceptors.request.use(
 
 // Interceptor для обработки ошибок авторизации
 api.interceptors.response.use(
-    (response) => response,
+    (response) => {
+        console.log(response.data);
+        return response
+    },
     (error) => {
         // if (error.response?.status === 401) {
         //     localStorage.removeItem('token');

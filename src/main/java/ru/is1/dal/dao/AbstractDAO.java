@@ -19,6 +19,8 @@ public abstract class AbstractDAO<T extends Identifiable> {
 
     public T save(T entity) {
         Session session = factory.getCurrentSession();
+        throwIfExistsAnyByEntity(entity);
+
         if (entity.getId() == null) {
             session.persist(entity);
             System.out.println("Saving: " + entity);
@@ -28,6 +30,8 @@ public abstract class AbstractDAO<T extends Identifiable> {
 
     public T update(T entity) {
         Session session = factory.getCurrentSession();
+        throwIfExistsAnyByEntity(entity);
+
         T managed = session.merge(entity);
         System.out.println("Updating: " + entity);
         return managed;
@@ -48,7 +52,6 @@ public abstract class AbstractDAO<T extends Identifiable> {
 
         query.select(root);
 
-        // Добавляем сортировку
         if ("ASC".equalsIgnoreCase(direction)) {
             query.orderBy(cb.asc(root.get(field)));
         } else {
@@ -104,4 +107,17 @@ public abstract class AbstractDAO<T extends Identifiable> {
             throw new RuntimeException("Ошибка пакетного сохранения: " + e.getMessage(), e);
         }
     }
+
+    public List<T> findAll() {
+        Session session = factory.getCurrentSession();
+        var cb = session.getCriteriaBuilder();
+        var query = cb.createQuery(entityClass);
+        var root = query.from(entityClass);
+
+        query.select(root);
+        return session.createQuery(query).list();
+    }
+
+    public abstract void throwIfExistsAnyByEntity(T entities);
+    public abstract boolean existsAnyByEntity(List<T> list);
 }

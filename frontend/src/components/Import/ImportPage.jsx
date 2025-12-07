@@ -65,8 +65,8 @@ const ImportPage = ({refreshTrigger}) => {
     };
 
     const handleViewImport = (userImport) => {
-        setSelectedImport(userImport);
-        setShowImportView(true);
+        setSelectedUserImport(userImport);
+        setShowUserImportView(true);
     };
 
 

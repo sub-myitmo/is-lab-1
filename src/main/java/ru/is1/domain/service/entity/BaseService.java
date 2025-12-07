@@ -1,4 +1,4 @@
-package ru.is1.domain.service;
+package ru.is1.domain.service.entity;
 
 import java.util.List;
 import java.util.Optional;

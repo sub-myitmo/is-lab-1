@@ -1,4 +1,4 @@
-package ru.is1.domain.service;
+package ru.is1.domain.service.userimport;
 
 import com.fasterxml.jackson.core.JsonLocation;
 import com.fasterxml.jackson.core.JsonParseException;
@@ -122,7 +122,8 @@ public class JsonService {
         try {
             return objectMapper.writeValueAsString(object);
         } catch (JsonProcessingException e) {
-            throw new JsonProcessingException(createUserFriendlyMessage(e, "Ошибка сериализации в JSON"), e) {};
+            throw new JsonProcessingException(createUserFriendlyMessage(e, "Ошибка сериализации в JSON"), e) {
+            };
         }
     }
 }

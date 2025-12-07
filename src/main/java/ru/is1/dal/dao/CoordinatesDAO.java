@@ -18,32 +18,6 @@ public class CoordinatesDAO extends AbstractDAO<Coordinates> {
         super(Coordinates.class);
     }
 
-
-    public List<Coordinates> findAll() {
-        Session session = factory.getCurrentSession();
-        var cb = session.getCriteriaBuilder();
-        var query = cb.createQuery(Coordinates.class);
-        var root = query.from(Coordinates.class);
-
-        query.select(root);
-        return session.createQuery(query).list();
-
-    }
-
-    public List<Coordinates> findByXAndY(Float x, Integer y) {
-        Session session = factory.getCurrentSession();
-        var cb = session.getCriteriaBuilder();
-        var query = cb.createQuery(Coordinates.class);
-        var root = query.from(Coordinates.class);
-
-        query.select(root).where(cb.and(
-                cb.equal(root.get("x"), x),
-                cb.equal(root.get("y"), y)
-        ));
-        return session.createQuery(query).list();
-
-    }
-
     private boolean isCoordinatesUsed(Long coordinatesId) {
         Session session = factory.getCurrentSession();
         var cb = session.getCriteriaBuilder();
@@ -77,14 +51,21 @@ public class CoordinatesDAO extends AbstractDAO<Coordinates> {
         ).executeUpdate();
     }
 
-    public boolean existsAnyByCoordinates(List<Coordinates> coordinatesList) {
+    @Override
+    public void throwIfExistsAnyByEntity(Coordinates coordinates) {
+        if (existsAnyByEntity(List.of(coordinates))) {
+            throw new IllegalArgumentException("Location with this fields already exists");
+        }
+    }
+
+    @Override
+    public boolean existsAnyByEntity(List<Coordinates> coordinatesList) {
         if (coordinatesList == null || coordinatesList.isEmpty()) {
             return false;
         }
 
         Session session = factory.getCurrentSession();
 
-        // Фильтруем валидные координаты
         List<Coordinates> validCoords = coordinatesList.stream()
                 .filter(c -> c != null && c.getX() != null)
                 .toList();
@@ -93,7 +74,6 @@ public class CoordinatesDAO extends AbstractDAO<Coordinates> {
             return false;
         }
 
-        // Строим HQL запрос с условиями OR
         StringBuilder hql = new StringBuilder(
                 "SELECT COUNT(c) FROM Coordinates c WHERE "
         );
@@ -105,15 +85,11 @@ public class CoordinatesDAO extends AbstractDAO<Coordinates> {
                 hql.append(" OR ");
             }
             hql.append("(c.x = :x").append(i).append(" AND c.y = :y").append(i).append(")");
-
             parameters.add(validCoords.get(i).getX());
             parameters.add(validCoords.get(i).getY());
         }
 
-        // Создаем запрос
         Query<Long> query = session.createQuery(hql.toString(), Long.class);
-
-        // Устанавливаем параметры
         for (int i = 0; i < validCoords.size(); i++) {
             query.setParameter("x" + i, validCoords.get(i).getX());
             query.setParameter("y" + i, validCoords.get(i).getY());

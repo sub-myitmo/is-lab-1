@@ -26,7 +26,6 @@ public class PersonDAO extends AbstractDAO<Person> {
         query.select(root)
                 .where(cb.like(cb.lower(root.get(field)), "%" + namePattern.toLowerCase() + "%"));
 
-        // Добавляем сортировку
         if ("ASC".equalsIgnoreCase(direction)) {
             query.orderBy(cb.asc(root.get(field)));
         } else {
@@ -114,4 +113,32 @@ public class PersonDAO extends AbstractDAO<Person> {
 
         return session.createQuery(query).uniqueResult();
     }
+
+    @Override
+    public void throwIfExistsAnyByEntity(Person person) {
+        if (existsAnyByEntity(List.of(person))) {
+            throw new IllegalArgumentException("Person with this passportID already exists");
+        }
+    }
+
+    @Override
+    public boolean existsAnyByEntity(List<Person> persons) {
+        List<String> passportIDs = persons.stream().map(Person::getPassportID).toList();
+
+        if (passportIDs.isEmpty()) {
+            return false;
+        }
+        Session session = factory.getCurrentSession();
+        var cb = session.getCriteriaBuilder();
+        var query = cb.createQuery(Long.class);
+        var root = query.from(Person.class);
+
+        query.select(root.get("id"))
+                .where(root.get("passportID").in(passportIDs));
+
+        Long result = session.createQuery(query).setMaxResults(1).uniqueResult();
+        return result != null;
+    }
+
+
 }

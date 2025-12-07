@@ -12,7 +12,7 @@ import ru.is1.controller.dto.imports.ImportResponse;
 import ru.is1.controller.dto.imports.ImportsWrapper;
 import ru.is1.dal.entity.ImportStatus;
 import ru.is1.dal.entity.UserImport;
-import ru.is1.domain.service.ImportService;
+import ru.is1.domain.service.userimport.ImportService;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -105,14 +105,12 @@ public class ImportRestController {
             InputStream fileInputStream = inputPart.getBody(InputStream.class, null);
             UserImport userImport = importService.importFromJson(fileInputStream);
 
-
             if (Objects.equals(userImport.getStatus(), ImportStatus.ERROR.name())) {
                 broadcaster.broadcast("FAILURE_CREATED", userImport.getId(), "Import");
-                return Response.status(Response.Status.BAD_REQUEST)
-                        .entity(ImportResponse.fromEntity(userImport)).build();
+            } else {
+                broadcaster.broadcast("CREATED", userImport.getId(), "Import");
             }
 
-            broadcaster.broadcast("CREATED", userImport.getId(), "Import");
             return Response.ok(ImportResponse.fromEntity(userImport)).build();
 
         } catch (IOException e) {

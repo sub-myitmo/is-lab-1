@@ -1,0 +1,56 @@
+[
+{
+"name": "lol",
+"coordinates": {
+"x": 1,
+"y": 2
+},
+"eyeColor": "GREEN",
+"hairColor": "GREEN",
+"location": {
+"x": 1,
+"y": 2,
+"z": 3
+},
+"height": 111,
+"weight": 111,
+"passportID": "hahahahah",
+"nationality": "RUSSIA"
+},
+{
+"name": "lol",
+"coordinates": {
+"x": 2,
+"y": 2
+},
+"eyeColor": "GREEN",
+"hairColor": "GREEN",
+"location": {
+"x": 2,
+"y": 2,
+"z": 3
+},
+"height": 111,
+"weight": 111,
+"passportID": "2passid",
+"nationality": "RUSSIA"
+},
+{
+"name": "lol",
+"coordinates": {
+"x": 2,
+"y": 1
+},
+"eyeColor": "GREEN",
+"hairColor": "GREEN",
+"location": {
+"x": 4,
+"y": 10,
+"z": 3
+},
+"height": 111,
+"weight": 111,
+"passportID": "3passid",
+"nationality": "RUSSIA"
+}
+]

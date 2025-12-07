@@ -17,32 +17,6 @@ public class LocationDAO extends AbstractDAO<Location> {
         super(Location.class);
     }
 
-    public List<Location> findAll() {
-        Session session = factory.getCurrentSession();
-        var cb = session.getCriteriaBuilder();
-        var query = cb.createQuery(Location.class);
-        var root = query.from(Location.class);
-
-        query.select(root);
-        return session.createQuery(query).list();
-
-    }
-
-    public List<Location> findByXAndYAndZ(Integer x, Long y, Long z) {
-        Session session = factory.getCurrentSession();
-        var cb = session.getCriteriaBuilder();
-        var query = cb.createQuery(Location.class);
-        var root = query.from(Location.class);
-
-        query.select(root).where(cb.and(
-                cb.equal(root.get("x"), x),
-                cb.equal(root.get("y"), y),
-                cb.equal(root.get("z"), z)
-        ));
-        return session.createQuery(query).list();
-
-    }
-
     private boolean isLocationUsed(Long locationId) {
         Session session = factory.getCurrentSession();
         var cb = session.getCriteriaBuilder();
@@ -76,14 +50,21 @@ public class LocationDAO extends AbstractDAO<Location> {
         ).executeUpdate();
     }
 
-    public boolean existsAnyByLocation(List<Location> locationList) {
+    @Override
+    public void throwIfExistsAnyByEntity(Location location) {
+        if (existsAnyByEntity(List.of(location))) {
+            throw new IllegalArgumentException("Location with this fields already exists");
+        }
+    }
+
+    @Override
+    public boolean existsAnyByEntity(List<Location> locationList) {
         if (locationList == null || locationList.isEmpty()) {
             return false;
         }
 
         Session session = factory.getCurrentSession();
 
-        // Фильтруем валидные локации (x обязателен)
         List<Location> validLocations = locationList.stream()
                 .filter(loc -> loc != null && loc.getX() != null)
                 .toList();
@@ -92,7 +73,6 @@ public class LocationDAO extends AbstractDAO<Location> {
             return false;
         }
 
-        // Строим HQL запрос с учетом nullable полей
         StringBuilder hql = new StringBuilder(
                 "SELECT COUNT(l) FROM Location l WHERE "
         );
@@ -103,18 +83,12 @@ public class LocationDAO extends AbstractDAO<Location> {
             }
 
             Location loc = validLocations.get(i);
-
-            // x всегда есть, проверяем его
             hql.append("(l.x = :x").append(i);
-
-            // Для y - разное условие в зависимости от null
             if (loc.getY() != null) {
                 hql.append(" AND l.y = :y").append(i);
             } else {
                 hql.append(" AND l.y IS NULL");
             }
-
-            // Для z - разное условие в зависимости от null
             if (loc.getZ() != null) {
                 hql.append(" AND l.z = :z").append(i);
             } else {
@@ -126,7 +100,6 @@ public class LocationDAO extends AbstractDAO<Location> {
 
         Query<Long> query = session.createQuery(hql.toString(), Long.class);
 
-        // Устанавливаем параметры
         for (int i = 0; i < validLocations.size(); i++) {
             Location loc = validLocations.get(i);
             query.setParameter("x" + i, loc.getX());

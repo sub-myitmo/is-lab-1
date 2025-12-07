@@ -12,7 +12,7 @@ import java.util.Set;
 
 @ApplicationPath("/api")
 public class ApplicationConfig extends Application implements ServerApplicationConfig {
-    // WebSocket конфигурация
+
     @Override
     public Set<ServerEndpointConfig> getEndpointConfigs(Set<Class<? extends Endpoint>> endpointClasses) {
         return new HashSet<>(); // Возвращаем пустой Set, используем аннотированные классы

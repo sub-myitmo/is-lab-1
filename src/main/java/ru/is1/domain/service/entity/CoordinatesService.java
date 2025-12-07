@@ -5,7 +5,6 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import ru.is1.dal.dao.CoordinatesDAO;
 import ru.is1.dal.entity.Coordinates;
-import ru.is1.domain.service.BaseService;
 
 import java.util.List;
 import java.util.Optional;
@@ -39,9 +38,6 @@ public class CoordinatesService implements BaseService<Coordinates> {
     public Coordinates updateEntity(Coordinates coordinates) {
         if (coordinates.getId() == null) {
             throw new IllegalArgumentException("Coordinates ID cannot be null for update");
-        }
-        if (coordinatesDAO.existsAnyByCoordinates(List.of(coordinates))) {
-            throw new IllegalArgumentException("Coordinates with this fields already exist");
         }
         return coordinatesDAO.update(coordinates);
     }

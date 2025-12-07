@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { formatDate } from '../../utils/helpers';
 import {IMPORT_FIELDS} from '../../utils/constants';
 import '../styles/PersonTable.css';
 
@@ -58,7 +59,7 @@ const ImportTable = ({
                         <td>{userImport.status}</td>
                         <td>{userImport.count}</td>
                         <td>{userImport.errors}</td>
-                        <td>{userImport.creationDate}</td>
+                        <td>{formatDate(userImport.creationDate)}</td>
                         <td className="actions">
                             <button
                                 onClick={() => onView(userImport)}
